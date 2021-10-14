@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            #sound-stuff{
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+            }
+            #function-buttons {
+                list-style: none;
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+            }
+
+            #timeline {
+                border: 1px solid black;
+            }
+        </style>
+    </head>
+<body>
+    <div id="sound-stuff">
+        <ul id="function-buttons">
+            <li><button onclick="record()">Record</button></li>
+            <li><button>Pause</button></li>
+            <li><button>Stop</button></li>
+            <li><button onclick="addtrack()">Add track</button></li>
+        </ul>
+        <img src="sound-bar.png"/>
+    </div>
+    <div id="timeline">
+    </div>
+    <script>
+        function addtrack(){
+
+        }
+        function record(){
+            let timeline = document.getElementById("timeline");
+            let childCount = timeline.childElementCount;
+            console.log(childCount);
+            let trackTitle = document.createElement("p");
+            trackTitle.textContent = "Track " + (childCount+1);
+            let track = document.createElement("img");
+            track.src = "Sound-Wave.png";
+            let deleteButton = document.createElement("button");
+            deleteButton.textContent = "Delete";
+            deleteButton.onclick = "deletefunction()"
+            let div = document.createElement("div");
+            div.appendChild(trackTitle);
+            div.appendChild(track);
+            div.appendChild(deleteButton);
+            timeline.appendChild(div);
+        }
+
+        deletefunction(){
+            
+        }
+    </script>
+</body>
+</html>
