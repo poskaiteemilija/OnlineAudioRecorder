@@ -2,6 +2,10 @@
 <html>
     <head>
         <style>
+            body{
+                background-color: rgb(44, 44, 44);
+                color: white;
+            }
             #sound-stuff{
                 display: flex;
                 flex-direction: row;
@@ -17,6 +21,21 @@
             #timeline {
                 border: 1px solid black;
             }
+
+            .tracks{
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                border: 0.5px solid grey;
+            }
+
+            .tracks div{
+                display: flex;
+                flex-direction: row;
+                justify-content: left;
+                align-items: center;
+                padding: 0.5em;
+            }
         </style>
     </head>
 <body>
@@ -25,36 +44,59 @@
             <li><button onclick="record()">Record</button></li>
             <li><button>Pause</button></li>
             <li><button>Stop</button></li>
-            <li><button onclick="addtrack()">Add track</button></li>
+            <li><button onclick="record()">Add track</button></li>
         </ul>
         <img src="sound-bar.png"/>
     </div>
-    <div id="timeline">
+    <div>
+        <div id="timeline">
+        </div>
     </div>
     <script>
-        function addtrack(){
-
-        }
         function record(){
             let timeline = document.getElementById("timeline");
             let childCount = timeline.childElementCount;
             console.log(childCount);
-            let trackTitle = document.createElement("p");
+            let trackTitle = document.createElement("h2");
             trackTitle.textContent = "Track " + (childCount+1);
+            let silence = document.createElement("input");
+            silence.type = "checkbox";
+            silence.name = "silence";
+
+            let label = document.createElement("label");
+            label.innerHTML = "Silence";
+
+            let titleAndLabel = document.createElement("div");
+            titleAndLabel.className = "track-start";
+            titleAndLabel.appendChild(trackTitle);
+            titleAndLabel.appendChild(label);
+            titleAndLabel.appendChild(silence);
+
             let track = document.createElement("img");
             track.src = "Sound-Wave.png";
             let deleteButton = document.createElement("button");
             deleteButton.textContent = "Delete";
-            deleteButton.onclick = "deletefunction()"
+            deleteButton.onclick = function() {deletefunction()};
+            
             let div = document.createElement("div");
-            div.appendChild(trackTitle);
-            div.appendChild(track);
+            div.className = "tracks";
+            
+            let divtrackleft = document.createElement("div");
+            divtrackleft.appendChild(titleAndLabel);
+            divtrackleft.appendChild(track);
+            
+            div.appendChild(divtrackleft);
             div.appendChild(deleteButton);
+            
             timeline.appendChild(div);
         }
 
-        deletefunction(){
-            
+        function deletefunction(){
+            let timeline = document.getElementById("timeline");
+            let parent = timeline.parentElement;
+            parent.innerHTML = "";
+            timeline.innerHTML = "";
+            parent.appendChild(timeline);
         }
     </script>
 </body>
