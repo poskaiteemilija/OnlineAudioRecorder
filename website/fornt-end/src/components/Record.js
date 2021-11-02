@@ -20,7 +20,7 @@ let RecordButton = () =>{
         console.log(audioState);
     });*/
 
-    useEffect(() => {
+    /*useEffect(() => {
         axios({
             method: 'post',
             url: 'http://localhost:8000/api/session',
@@ -39,7 +39,7 @@ let RecordButton = () =>{
         }, (error) => {
             console.log(error);
         });
-    }, [localStorage.getItem('bloblink')]);
+    }, [localStorage.getItem('bloblink')]); */
 
     return(
         <div className="recordButton">
