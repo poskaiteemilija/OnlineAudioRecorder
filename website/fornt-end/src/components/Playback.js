@@ -1,6 +1,7 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { Howl } from 'howler';
 import AudioReactRecorder, { RecordState } from 'audio-react-recorder'; //audio recording npm library
+import RecordingState from './RecordingState';
 
 //import RecordButton from './Record';
 import Localbase from 'localbase';
@@ -24,6 +25,7 @@ let Playback = () =>{
     const [audioState, setAudio] = useState();
     const [recState, setRecord] = useState("");
 
+    let audioForWave = undefined;
     let db = new Localbase('db');
     //const PlaybackContext = React.createContext();
     //const [state, dispatch] = React.useReducer(playbackReducer /* probably another value to be added here */);
@@ -53,6 +55,7 @@ let Playback = () =>{
                 let audio = new Audio();
                 audio.src = url;
                 setAudio(audio);
+                audioForWave = audio;
                 audio.play();
             });
         }
@@ -93,7 +96,8 @@ let Playback = () =>{
                 <button onClick={() => setRecord(RecordState.STOP)}>Stop</button>
                 <button onClick={ startPlayback }>Play</button>
                 <button onClick={ pausePlayback }>Pause</button>
-                <button onClick={ skipToFront }>Skip to front</button> 
+                <button onClick={ skipToFront }>Skip to front</button>
+                <RecordingState audS={ audioForWave }/>
             {/* </PlaybackContext.Provider> */}
         </div>
     );
