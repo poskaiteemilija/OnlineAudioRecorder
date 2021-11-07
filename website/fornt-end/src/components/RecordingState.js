@@ -1,10 +1,15 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import AudioWave from './AudioWave';
 
 function RecordingState (props) {
-    console.log(props.audSS);
-    if(props.audioState!=undefined){
-        return <AudioWave audio={props.audioState}/>;
+
+    useEffect(() => {
+        console.log("THIS HAS CHANGED", props.data);
+    }, [props.data]);
+
+    console.log(props.data);
+    if(props.data!=undefined){
+        return <AudioWave audio={props.data}/>;
     }
     return <div/>;
     

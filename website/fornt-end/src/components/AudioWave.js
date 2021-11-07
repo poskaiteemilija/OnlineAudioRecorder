@@ -14,6 +14,7 @@ let AudioWave = (props) => {
     let wavesurfer;
 
     useEffect(() => {
+      document.getElementById("wave").innerHTML = "";
       if(waveformRef.current) {
         wavesurfer = WaveSurfer.create({
           container: waveformRef.current,
@@ -21,10 +22,10 @@ let AudioWave = (props) => {
         console.log(props.audio);
         wavesurfer.load(props.audio);
       }
-    }, []);    
+    }, [props.audio]);    
     
     return(
-        <div ref={waveformRef}>
+        <div ref={waveformRef} id="wave">
         </div>
     );
 }

@@ -24,8 +24,8 @@ let Playback = () =>{
     const [currentTime, setTime] = useState(0);
     const [audioState, setAudio] = useState();
     const [recState, setRecord] = useState("");
+    const [audForV, setAudForV] =  useState();
 
-    let audioForWave = undefined;
     let db = new Localbase('db');
     //const PlaybackContext = React.createContext();
     //const [state, dispatch] = React.useReducer(playbackReducer /* probably another value to be added here */);
@@ -41,7 +41,7 @@ let Playback = () =>{
 
 
     const startPlayback = useCallback(() => {
-        if(audioState==undefined){
+        //if(audioState==undefined){
             retrieveData(db).then((value) => {
                 //let reader = new FileReader();
                 //let url = URL.createObjectURL(value[0].blob);
@@ -55,10 +55,11 @@ let Playback = () =>{
                 let audio = new Audio();
                 audio.src = url;
                 setAudio(audio);
-                audioForWave = audio;
+                setAudForV(audio.cloneNode());
+                console.log(audioState);
                 audio.play();
             });
-        }
+        /*}
         else{
             if(audioState.paused){
                 audioState.play();
@@ -66,7 +67,7 @@ let Playback = () =>{
             else{
                 return;
             }
-        }
+        }*/
 
     });
 
@@ -88,6 +89,8 @@ let Playback = () =>{
     });
 
     //const value = {state, dispatch};
+    console.log(currentTime, audioState, recState, "each time i render");
+
     return(
         <div className="playback">
             {/* <PlaybackContext.Provider value={value}> */}
@@ -97,7 +100,7 @@ let Playback = () =>{
                 <button onClick={ startPlayback }>Play</button>
                 <button onClick={ pausePlayback }>Pause</button>
                 <button onClick={ skipToFront }>Skip to front</button>
-                <RecordingState audS={ audioForWave }/>
+                <RecordingState data={ audForV }/>
             {/* </PlaybackContext.Provider> */}
         </div>
     );
