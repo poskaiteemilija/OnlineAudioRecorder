@@ -1,10 +1,11 @@
 import React, { useCallback, useState, useEffect } from 'react';
-import { Howl } from 'howler';
+//import { Howl } from 'howler';
 import AudioReactRecorder, { RecordState } from 'audio-react-recorder'; //audio recording npm library
 import RecordingState from './RecordingState';
 
 //import RecordButton from './Record';
 import Localbase from 'localbase';
+import Export from "./Export";
 
 /*const playbackReducer = (state, action) => {
     //to be added code which switches the state of the application
@@ -15,7 +16,7 @@ import Localbase from 'localbase';
     }
 }*/
 
-async function retrieveData(db){
+export async function retrieveData(db){
     let ar = await db.collection('audio').get();
     return ar;
 }
@@ -100,6 +101,7 @@ let Playback = () =>{
                 <button onClick={ startPlayback }>Play</button>
                 <button onClick={ pausePlayback }>Pause</button>
                 <button onClick={ skipToFront }>Skip to front</button>
+                <Export />
                 <RecordingState data={ audForV }/>
             {/* </PlaybackContext.Provider> */}
         </div>
