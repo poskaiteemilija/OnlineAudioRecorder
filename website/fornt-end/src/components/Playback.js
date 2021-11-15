@@ -1,9 +1,9 @@
 import React, { useCallback, useState, useEffect } from 'react';
 //import { Howl } from 'howler';
-import AudioReactRecorder, { RecordState } from 'audio-react-recorder'; //audio recording npm library
 import RecordingState from './RecordingState';
 
 //import RecordButton from './Record';
+import { ReactMic } from 'react-mic';       //new recording npm library that solves multiple issues, that the old library had
 import Localbase from 'localbase';
 import Export from "./Export";
 
@@ -24,8 +24,9 @@ export async function retrieveData(db){
 let Playback = () =>{
     const [currentTime, setTime] = useState(0);
     const [audioState, setAudio] = useState();
-    const [recState, setRecord] = useState("");
+    const [recState, setRecord] = useState({record: false});
     const [audForV, setAudForV] =  useState();
+    const [loadWave, setWave] = useState(false);
 
     let db = new Localbase('db');
     //const PlaybackContext = React.createContext();
@@ -42,33 +43,7 @@ let Playback = () =>{
 
 
     const startPlayback = useCallback(() => {
-        //if(audioState==undefined){
-            retrieveData(db).then((value) => {
-                //let reader = new FileReader();
-                //let url = URL.createObjectURL(value[0].blob);
-                //let sound = new Howl({
-                //    src: [url],
-                //    ext: ['wav']
-                //});
-                //sound.play();
-    
-                let url = URL.createObjectURL(value[0].blob);
-                let audio = new Audio();
-                audio.src = url;
-                setAudio(audio);
-                setAudForV(audio.cloneNode());
-                console.log(audioState);
-                audio.play();
-            });
-        /*}
-        else{
-            if(audioState.paused){
-                audioState.play();
-            }
-            else{
-                return;
-            }
-        }*/
+        audioState.play();
 
     });
 
@@ -83,21 +58,37 @@ let Playback = () =>{
         audioState.currentTime = 0;
     })
 
-    const onStop = useCallback((audioData) => {
-        console.log('audio', audioData);
+    /*const onData = useCallback((recordedBlob) => {
+        console.log('chunk of real-time data is: ', recordedBlob);
+    });*/
+    
+    const onStop = useCallback((recordedBlob) => {
+        console.log('recordedBlob is: ', recordedBlob);
         db.collection('audio').delete();
-        db.collection('audio').add(audioData);
-    });
+        db.collection('audio').add(recordedBlob);
+        let audio = new Audio();
+        audio.src = recordedBlob.blobURL;
+        console.log(audio);
+        setAudio(audio.cloneNode());
+        setAudForV(audio.cloneNode());
+      });
 
     //const value = {state, dispatch};
-    console.log(currentTime, audioState, recState, "each time i render");
+    //console.log(currentTime, audioState, recState, "each time i render");
 
+    //try using https://github.com/0x006F/react-media-recorder/ instead of this broken mess, which is throwing a random error
     return(
         <div className="playback">
             {/* <PlaybackContext.Provider value={value}> */}
-                <AudioReactRecorder state={ recState } onStop={ onStop }/>
-                <button onClick={() => setRecord(RecordState.START)}>Record</button>
-                <button onClick={() => setRecord(RecordState.STOP)}>Stop</button>
+                <ReactMic
+                    record={ recState.record }
+                    className="sound-wave"
+                    onStop={ onStop }
+
+                    strokeColor="#000000"
+                backgroundColor="#FF4081" />
+                <button onClick={() => setRecord({record: true})}>Record</button>
+                <button onClick={() => setRecord({record: false})}>Stop</button>
                 <button onClick={ startPlayback }>Play</button>
                 <button onClick={ pausePlayback }>Pause</button>
                 <button onClick={ skipToFront }>Skip to front</button>
