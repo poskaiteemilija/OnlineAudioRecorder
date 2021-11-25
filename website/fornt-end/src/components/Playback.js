@@ -7,15 +7,6 @@ import { ReactMic } from 'react-mic';       //new recording npm library that sol
 import Localbase from 'localbase';
 import Export from "./Export";
 
-/*const playbackReducer = (state, action) => {
-    //to be added code which switches the state of the application
-    switch(action.type){
-        case 'play-rec':
-            //solution in this switch section taken and modified from https://stackoverflow.com/questions/18650168/convert-blob-to-base64
-
-    }
-}*/
-
 export async function retrieveData(db){
     let ar = await db.collection('audio').get();
     return ar;
@@ -26,20 +17,13 @@ let Playback = () =>{
     const [audioState, setAudio] = useState();
     const [recState, setRecord] = useState({record: false});
     const [audForV, setAudForV] =  useState();
-    const [loadWave, setWave] = useState(false);
+    const [playbackState, setPlaybackState] = useState({
+        playing: false,
+        cursorPoint: 0,
+        audioLenght: 0
+    });
 
     let db = new Localbase('db');
-    //const PlaybackContext = React.createContext();
-    //const [state, dispatch] = React.useReducer(playbackReducer /* probably another value to be added here */);
-    //const [audioState, setAudio] = useState({"isEmpty" : true});
-
-    /*useEffect(() => {
-        setAudio({
-            "audio" : props.newRec,
-            "isEmpty" : false,
-        });
-        console.log(audioState);
-    }, [props.newRec]);*/
 
 
     const startPlayback = useCallback(() => {
@@ -55,7 +39,13 @@ let Playback = () =>{
     });
 
     const skipToFront = useCallback(() =>{
-        audioState.currentTime = 0;
+            if(!audioState.paused){
+                audioState.pause();
+            }
+            setTime(0);
+            audioState.src = audioState.src;
+            console.log(audioState.currentTime);
+            //audioState.play();
     })
 
     /*const onData = useCallback((recordedBlob) => {
@@ -63,23 +53,22 @@ let Playback = () =>{
     });*/
     
     const onStop = useCallback((recordedBlob) => {
-        console.log('recordedBlob is: ', recordedBlob);
+        //console.log('recordedBlob is: ', recordedBlob);
         db.collection('audio').delete();
         db.collection('audio').add(recordedBlob);
         let audio = new Audio();
         audio.src = recordedBlob.blobURL;
-        console.log(audio);
+        //console.log(audio);
         setAudio(audio.cloneNode());
+        setPlaybackState({audioLenght: audio.duration});
         setAudForV(audio.cloneNode());
       });
 
-    //const value = {state, dispatch};
-    //console.log(currentTime, audioState, recState, "each time i render");
-
-    //try using https://github.com/0x006F/react-media-recorder/ instead of this broken mess, which is throwing a random error
+    console.log(currentTime, audioState, recState);
+    console.log(playbackState);
+    
     return(
         <div className="playback">
-            {/* <PlaybackContext.Provider value={value}> */}
                 <ReactMic
                     record={ recState.record }
                     className="sound-wave"
@@ -94,7 +83,6 @@ let Playback = () =>{
                 <button onClick={ skipToFront }>Skip to front</button>
                 <Export />
                 <RecordingState data={ audForV }/>
-            {/* </PlaybackContext.Provider> */}
         </div>
     );
 }
