@@ -6,6 +6,7 @@ import RecordingState from './RecordingState';
 import { ReactMic } from 'react-mic';       //new recording npm library that solves multiple issues, that the old library had
 import Localbase from 'localbase';
 import Export from "./Export";
+import Cursor from "./Cursor";
 
 export async function retrieveData(db){
     let ar = await db.collection('audio').get();
@@ -19,22 +20,25 @@ let Playback = () =>{
     const [audForV, setAudForV] =  useState();
     const [playbackState, setPlaybackState] = useState({
         playing: false,
-        cursorPoint: 0,
-        audioLenght: 0
+        duration: 0
     });
 
     let db = new Localbase('db');
 
-
     const startPlayback = useCallback(() => {
         audioState.play();
-
+        let copy = playbackState;
+        copy.playing = true;
+        setPlaybackState(copy);
     });
 
     const pausePlayback = useCallback(() => {
         if(!audioState.paused){
             setTime(audioState.currentTime);
             audioState.pause();
+            let copy = playbackState;
+            copy.playing = false;
+            setPlaybackState(copy);
         }
     });
 
@@ -44,7 +48,10 @@ let Playback = () =>{
             }
             setTime(0);
             audioState.src = audioState.src;
-            console.log(audioState.currentTime);
+            //console.log(audioState.currentTime);
+            let copy = playbackState;
+            copy.playing = false;
+            setPlaybackState(copy);
             //audioState.play();
     })
 
@@ -58,31 +65,38 @@ let Playback = () =>{
         db.collection('audio').add(recordedBlob);
         let audio = new Audio();
         audio.src = recordedBlob.blobURL;
-        //console.log(audio);
         setAudio(audio.cloneNode());
-        setPlaybackState({audioLenght: audio.duration});
+        setPlaybackState({
+            playing: false,
+            duration: (recordedBlob.stopTime - recordedBlob.startTime)/1000
+        });
         setAudForV(audio.cloneNode());
+        
       });
 
-    console.log(currentTime, audioState, recState);
-    console.log(playbackState);
+    //console.log(currentTime, audioState, recState);
+    //console.log(playbackState);
     
     return(
         <div className="playback">
-                <ReactMic
-                    record={ recState.record }
-                    className="sound-wave"
-                    onStop={ onStop }
-
-                    strokeColor="#000000"
-                backgroundColor="#FF4081" />
-                <button onClick={() => setRecord({record: true})}>Record</button>
-                <button onClick={() => setRecord({record: false})}>Stop</button>
-                <button onClick={ startPlayback }>Play</button>
-                <button onClick={ pausePlayback }>Pause</button>
-                <button onClick={ skipToFront }>Skip to front</button>
-                <Export />
-                <RecordingState data={ audForV }/>
+                <div id="recording-control-panel">
+                    <ReactMic
+                        record={ recState.record }
+                        className="sound-wave"
+                        onStop={ onStop }
+                        strokeColor="#000000"
+                        backgroundColor="#FF4081" />
+                    <button onClick={() => setRecord({record: true})}>Record</button>
+                    <button onClick={() => {
+                        if(playbackState.playing === true) skipToFront();
+                        else setRecord({record: false});
+                        }}>Stop</button>
+                    <button onClick={ startPlayback }>Play</button>
+                    <button onClick={ pausePlayback }>Pause</button>
+                    <button onClick={ skipToFront }>Skip to front</button>
+                    <Export />
+                </div>
+                <Cursor playback={ playbackState } data={ audForV } />
         </div>
     );
 }
