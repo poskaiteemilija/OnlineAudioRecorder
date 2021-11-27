@@ -18,27 +18,21 @@ let Playback = () =>{
     const [audioState, setAudio] = useState();
     const [recState, setRecord] = useState({record: false});
     const [audForV, setAudForV] =  useState();
-    const [playbackState, setPlaybackState] = useState({
-        playing: false,
-        duration: 0
-    });
+    const [playbackState, setPlaybackState] = useState(false);
+    const [duration, setDuration] = useState(0);
 
     let db = new Localbase('db');
 
     const startPlayback = useCallback(() => {
         audioState.play();
-        let copy = playbackState;
-        copy.playing = true;
-        setPlaybackState(copy);
+        setPlaybackState(true);
     });
 
     const pausePlayback = useCallback(() => {
         if(!audioState.paused){
             setTime(audioState.currentTime);
             audioState.pause();
-            let copy = playbackState;
-            copy.playing = false;
-            setPlaybackState(copy);
+            setPlaybackState(false);
         }
     });
 
@@ -49,9 +43,7 @@ let Playback = () =>{
             setTime(0);
             audioState.src = audioState.src;
             //console.log(audioState.currentTime);
-            let copy = playbackState;
-            copy.playing = false;
-            setPlaybackState(copy);
+            setPlaybackState(false);
             //audioState.play();
     })
 
@@ -66,10 +58,7 @@ let Playback = () =>{
         let audio = new Audio();
         audio.src = recordedBlob.blobURL;
         setAudio(audio.cloneNode());
-        setPlaybackState({
-            playing: false,
-            duration: (recordedBlob.stopTime - recordedBlob.startTime)/1000
-        });
+        setDuration(recordedBlob.stopTime - recordedBlob.startTime);
         setAudForV(audio.cloneNode());
         
       });
@@ -88,7 +77,7 @@ let Playback = () =>{
                         backgroundColor="#FF4081" />
                     <button onClick={() => setRecord({record: true})}>Record</button>
                     <button onClick={() => {
-                        if(playbackState.playing === true) skipToFront();
+                        if(playbackState === true) skipToFront();
                         else setRecord({record: false});
                         }}>Stop</button>
                     <button onClick={ startPlayback }>Play</button>
@@ -96,7 +85,7 @@ let Playback = () =>{
                     <button onClick={ skipToFront }>Skip to front</button>
                     <Export />
                 </div>
-                <Cursor playback={ playbackState } data={ audForV } />
+                <Cursor playback={ playbackState } data={ audForV } duration={ duration } />
         </div>
     );
 }
