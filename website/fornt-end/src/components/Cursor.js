@@ -31,13 +31,13 @@ const Cursor = (props)=>{
             const viewport = document.getElementById("playback-panel");
             let distance = viewport.clientWidth;
             console.log("distance", distance);
-            const velocity = distance/props.duration;
+            const velocity = props.duration/distance*15;
             console.log(props.duration);
             console.log(velocity);
             let count = 0;
             let newMargin = marginPlace;
             while(true){
-                newMargin = await calcFrame(newMargin, velocity, timer, 1);
+                newMargin = await calcFrame(newMargin, 10, timer, velocity);
                 console.log(newMargin);
                 setMarginPlace(newMargin);
                 console.log("this is margin place", marginPlace);
@@ -54,7 +54,7 @@ const Cursor = (props)=>{
     return(
         <div id="playback-panel">
             <div id="cursor" style={{marginLeft: marginPlace + 'px'}}></div>
-            <RecordingState data = { props.data } />
+            
         </div>
     );
 }
