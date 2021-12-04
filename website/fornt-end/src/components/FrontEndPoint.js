@@ -32,8 +32,21 @@ const FrontEndPoint = () =>{
     const testPut = useCallback( async () => {
         let db = new Localbase('db');
         const data = await retrieveData(db);
-        console.log(data, "lol");
-
+        console.log(data[0]);
+        let formData = new FormData();
+        formData.append("session", 12345);
+        formData.append("audio_file", data[0]);
+        
+        axios({
+            method: 'post',
+            url: 'http://localhost:8000/api/back/',
+            data: formData,
+            headers: { "Content-Type": "multipart/form-data" }
+        })
+        .then(resp => {
+            console.log(resp);
+        })
+        .catch(error => {});
     });
     
 
