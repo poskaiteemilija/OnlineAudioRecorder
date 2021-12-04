@@ -1,6 +1,6 @@
-from back.models import TestClass, SessionInfo
+from back.models import TestClass, SessionInfo, AudioStorage
 from rest_framework import viewsets, permissions
-from .serializers import TestClassSerializer, SessionInfoSerializer
+from .serializers import TestClassSerializer, SessionInfoSerializer, AudioStorageSerializer
 
 #TestClass Viewset
 class TestClassViewSet(viewsets.ModelViewSet):
@@ -16,3 +16,7 @@ class SessionInfoViewSet(viewsets.ModelViewSet):
         permissions.AllowAny
     ]
     serializer_class = SessionInfoSerializer
+
+class AudioStorageViewSet(viewsets.ModelViewSet):
+    queryset = AudioStorage.objects.all()
+    serializer_class = AudioStorageSerializer

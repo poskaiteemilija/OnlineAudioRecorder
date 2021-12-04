@@ -1,6 +1,7 @@
 import React, { useCallback } from "react";
 import axios from "axios";
-
+import { retrieveData } from "./Playback";
+import Localbase from "localbase";
 
 
 const FrontEndPoint = () =>{
@@ -27,10 +28,20 @@ const FrontEndPoint = () =>{
     
         });
     });
+
+    const testPut = useCallback( async () => {
+        let db = new Localbase('db');
+        const data = await retrieveData(db);
+        console.log(data, "lol");
+
+    });
     
 
     return(
-        <button onClick = {test()}>test</button>
+        <div>
+            <button onClick = {test}>test</button>
+            <button onClick = {testPut}>testPut</button>
+        </div>
     );
 }
 
