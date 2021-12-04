@@ -33,13 +33,15 @@ const FrontEndPoint = () =>{
         let db = new Localbase('db');
         const data = await retrieveData(db);
         console.log(data[0]);
+        const file = new File([data[0].blob], "r.webm", {type: "audio/webm"});
+        console.log(file);
         let formData = new FormData();
         formData.append("session", 12345);
-        formData.append("audio_file", data[0]);
-        
+        formData.append("audio_file", file);
+
         axios({
             method: 'post',
-            url: 'http://localhost:8000/api/back/',
+            url: 'http://localhost:8000/api/upload/',
             data: formData,
             headers: { "Content-Type": "multipart/form-data" }
         })
