@@ -2,6 +2,7 @@ import React, { useCallback } from "react";
 import axios from "axios";
 import { retrieveData } from "./Playback";
 import Localbase from "localbase";
+import {v4 as uuid} from "uuid";
 
 
 const FrontEndPoint = () =>{
@@ -55,10 +56,15 @@ const FrontEndPoint = () =>{
         .catch(error => {});
     });
 
+    const generateSession = useCallback(() => {
+        console.log(uuid() + Date.now())
+    });
+
     return(
         <div>
             <button onClick = {createSes}>testCSRF</button>
             <button onClick = {testPut}>testPut</button>
+            <button onClick={generateSession}>generate session</button>
         </div>
     );
 }
