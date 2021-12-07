@@ -5,29 +5,22 @@ import Localbase from "localbase";
 
 
 const FrontEndPoint = () =>{
-    //const http = axios.create({
-    //    baseURL: "http://localhost:8000/api",
-    //    headers: {
-    //        "Content-type": "application/json"
-    //    }
+    //const test = useCallback(() => {
+    //    //http.get(`/back/`, "hello this works");
+    //    axios({
+    //        method: 'post',
+    //        url: 'http://localhost:8000/api/back/',
+    //        data: {
+    //            message: "labai gera z",
+    //        }
+    //    })
+    //    .then(resp => {
+    //        console.log(resp);
+    //    })
+    //    .catch(error => {
+    //
+    //    });
     //});
-
-    const test = useCallback(() => {
-        //http.get(`/back/`, "hello this works");
-        axios({
-            method: 'post',
-            url: 'http://localhost:8000/api/back/',
-            data: {
-                message: "labai gera z",
-            }
-        })
-        .then(resp => {
-            console.log(resp);
-        })
-        .catch(error => {
-    
-        });
-    });
 
     const testPut = useCallback( async () => {
         let db = new Localbase('db');
@@ -51,10 +44,20 @@ const FrontEndPoint = () =>{
         .catch(error => {});
     });
     
+    const createSes = useCallback(() => {
+        axios({
+            method: 'get',
+            url: 'http://localhost:8000/api/csrf/',
+        })
+        .then(resp => {
+            console.log(resp);
+        })
+        .catch(error => {});
+    });
 
     return(
         <div>
-            <button onClick = {test}>test</button>
+            <button onClick = {createSes}>testCSRF</button>
             <button onClick = {testPut}>testPut</button>
         </div>
     );

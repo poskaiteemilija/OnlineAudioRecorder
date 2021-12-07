@@ -6,6 +6,7 @@ import RecordingState from './RecordingState';
 import { ReactMic } from 'react-mic';       //new recording npm library that solves multiple issues, that the old library had
 import Localbase from 'localbase';
 import Export from "./Export";
+import FrontEndPoint from './FrontEndPoint';
 
 export async function retrieveData(db){
     let ar = await db.collection('audio').get();
