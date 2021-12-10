@@ -23,7 +23,6 @@ let Playback = () =>{
     let db = new Localbase('db');
     
     const onStop = useCallback((recordedBlob) => {
-        db.collection('audio').delete();
         db.collection('audio').add(recordedBlob);
         let audio = new Audio();
         audio.src = recordedBlob.blobURL;

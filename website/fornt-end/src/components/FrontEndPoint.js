@@ -2,27 +2,10 @@ import React, { useCallback } from "react";
 import axios from "axios";
 import { retrieveData } from "./Playback";
 import Localbase from "localbase";
-import {v4 as uuid} from "uuid";
+
 
 
 const FrontEndPoint = () =>{
-    //const test = useCallback(() => {
-    //    //http.get(`/back/`, "hello this works");
-    //    axios({
-    //        method: 'post',
-    //        url: 'http://localhost:8000/api/back/',
-    //        data: {
-    //            message: "labai gera z",
-    //        }
-    //    })
-    //    .then(resp => {
-    //        console.log(resp);
-    //    })
-    //    .catch(error => {
-    //
-    //    });
-    //});
-
     const testPut = useCallback( async () => {
         let db = new Localbase('db');
         const data = await retrieveData(db);
@@ -30,7 +13,7 @@ const FrontEndPoint = () =>{
         const file = new File([data[0].blob], "r.webm", {type: "audio/webm"});
         console.log(file);
         let formData = new FormData();
-        formData.append("session", 12345);
+        formData.append("session", localStorage.getItem("sessionID"));
         formData.append("audio_file", file);
 
         axios({
@@ -44,27 +27,23 @@ const FrontEndPoint = () =>{
         })
         .catch(error => {});
     });
-    
-    const createSes = useCallback(() => {
+
+    const testGet = useCallback(() => {
         axios({
             method: 'get',
-            url: 'http://localhost:8000/api/csrf/',
+            url: 'http://localhost:8000/api/upload/'
         })
-        .then(resp => {
+        .then(resp =>{
             console.log(resp);
         })
-        .catch(error => {});
+        .catch(error => {})
     });
 
-    const generateSession = useCallback(() => {
-        console.log(uuid() + Date.now())
-    });
 
     return(
         <div>
-            <button onClick = {createSes}>testCSRF</button>
+            <button onClick= {testGet}>testGet</button>
             <button onClick = {testPut}>testPut</button>
-            <button onClick={generateSession}>generate session</button>
         </div>
     );
 }
