@@ -1,7 +1,9 @@
-import React, { useRef, useEffect, useCallback, useState } from 'react';
+import React, { useRef, useEffect, useCallback, useState, useContext } from 'react';
 import WaveSurfer from 'wavesurfer.js';
 
 let AudioWave = (props) => {
+    //const { playbackTime, setPlaybackTime } = useContext(PlaybackContext);
+
     const [state, setState] = useState();
     const waveformRef = useRef();
     const [wavesurfer, setWaveSurfer] = useState();
@@ -11,8 +13,13 @@ let AudioWave = (props) => {
       if(waveformRef.current) {
         let wavesurfertemp = WaveSurfer.create({
           container: waveformRef.current,
+          backgroundColor: "#ffffff",
+
         });
         wavesurfertemp.load(props.audio);
+        wavesurfertemp.setCursorColor('#fa95d0');
+        wavesurfertemp.setHeight("200")
+        //setBackgroundColor()
         setWaveSurfer(wavesurfertemp);
         setState(true);
       }
@@ -64,7 +71,7 @@ let AudioWave = (props) => {
       wavesurfer.stop();
       wavesurfer.seekTo(1);
     });
-    
+
     return(
       <div ref={waveformRef} id="wave"></div>       
     );

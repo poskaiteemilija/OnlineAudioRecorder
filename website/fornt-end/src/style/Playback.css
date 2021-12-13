@@ -1,0 +1,50 @@
+#recording-control-panel{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    height: inherit;
+}
+
+
+#button-panel{
+    margin-left: 1em;
+    margin-top: 1em;
+    display: flex;
+    flex-direction: row;
+}
+
+.function-button{
+    width: 5em;
+    height: 5em;
+    margin: 3px;
+    background-color: #484848;
+    color: white;
+    border: none;
+    border-radius: 8px;
+}
+
+.sound-wave{
+    border-radius: 8px;
+    margin-right: 3px;
+}
+
+#sound-export{
+    display: flex;
+    flex-direction: row;
+    align-items:center;
+    margin-top: 1em;
+    margin-right: 1em;
+}
+
+#recording-pane{
+    border: #484848 2px solid;
+    background-color: #484848;
+    margin:1em;
+    height: 50em;
+}
+
+#time-stamp{
+    color: white;
+    font-size: 2em;
+}

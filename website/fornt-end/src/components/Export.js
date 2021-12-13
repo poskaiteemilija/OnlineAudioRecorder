@@ -26,7 +26,7 @@ let Export = () => {
 
     return(
         <div id="download-file">
-            <button onClick={ exportRec }>Export</button>
+            <button className="function-button" onClick={ exportRec }>Export</button>
         </div>
     );
 }
