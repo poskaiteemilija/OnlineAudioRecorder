@@ -1,0 +1,23 @@
+#time-scale, #numbers{
+    display: flex;
+    flex-direction: row;
+}
+
+#numbers{
+    margin:0;
+    height: 20px;
+}
+
+#time-scale{
+    height: 10px;
+    border-bottom: solid 2px #262626;
+}
+
+.scale{
+    border-right: solid 1px white;
+}
+
+.num{
+    color: white;
+    margin: 0;
+}
