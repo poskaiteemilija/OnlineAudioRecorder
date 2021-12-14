@@ -45,6 +45,7 @@ let Playback = () =>{
     });
 
     const convert = useCallback((milis) => {
+        //this solution has been modified to my needs and takes from this source https://stackoverflow.com/questions/21294302/converting-milliseconds-to-minutes-and-seconds-with-javascript
         const minutes = Math.floor(milis/60000);
         const seconds = ((milis%60000)/1000).toFixed(0);
         const miliseconds = milis - Math.floor(milis/1000)*1000;

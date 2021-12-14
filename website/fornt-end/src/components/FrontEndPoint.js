@@ -29,34 +29,35 @@ const FrontEndPoint = () =>{
     });
 
     const testGet = useCallback(() => {
+        console.log("what")
         const ses = localStorage.getItem('sessionID');
         let form = new FormData();
         form.append('session', ses);
         form.append('format', 'mp3');
-        form.append('filename', 'bybiskiausainaxui');
+        form.append('filename', 'test');
         axios({
             method: 'post',
             url: 'http://localhost:8000/api/export',
             data: form,
         })
         .then(resp =>{
-            //console.log(resp.data);
-            let file = new File(resp.data, "ok.mp3", {type: "audio/mp3"});
-            console.log("aha");
-            console.log(file);
-            const url = URL.createObjectURL(file);
-            console.log("what", url);
-            const a = document.createElement("a");
-            let df = document.getElementById("download-file");
-            
-            a.href = url;
-            a.download = "audio" + '.mp3';
-            df.appendChild(a);
-
-            a.click();
-
-            window.URL.revokeObjectURL(url);
-            df.removeChild(a);
+            console.log(resp.data);
+            //let file = new File(resp.data, "ok.mp3", {type: "audio/mp3"});
+            //console.log("aha");
+            //console.log(file);
+            //const url = URL.createObjectURL(file);
+            //console.log("what", url);
+            //const a = document.createElement("a");
+            //let df = document.getElementById("download-file");
+            //
+            //a.href = url;
+            //a.download = "audio" + '.mp3';
+            //df.appendChild(a);
+//
+            //a.click();
+//
+            //window.URL.revokeObjectURL(url);
+            //df.removeChild(a);
 
         })
         .catch(error => {})

@@ -39,7 +39,7 @@ const TimeScale = (props) => {
             else{
                 number.style.marginRight = distance/itterations-18+"px";
             }
-            numberDiv.appendChild(number);
+            //numberDiv.appendChild(number);
             topDiv.appendChild(scale);
         }
         
