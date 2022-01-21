@@ -56,12 +56,12 @@ let Playback = () =>{
         <div className="playback">
                 <div id="recording-control-panel">
                     <div id="button-panel">
-                        <button id="rec" className="function-button" onClick={() => setRecord({record: true})}>Record</button>
-                        <button id="stop" className="function-button" onClick={() => stopBut()}>Stop</button>
-                        <button id="play" className="function-button" onClick={ () => setPlayback("play") }>Play</button>
-                        <button id="pause" className="function-button" onClick={ () => setPlayback("pause") }>Pause</button>
-                        <button id="stf" className="function-button" onClick={ () => setPlayback("skipToFront") }>Skip to front</button>
-                        <button id="stb" className="function-button" onClick={ () => setPlayback("skipToBack") }>Skip to back</button>
+                        <button id="rec" className="function-button" onClick={() => setRecord({record: true})}><img src={require("../style/assets/rec.svg").default} alt="Record" /></button>
+                        <button id="stop" className="function-button" onClick={() => stopBut()}><img src={require("../style/assets/stop.svg").default} alt="Stop" /></button>
+                        <button id="play" className="function-button" onClick={ () => setPlayback("play") }><img src={require("../style/assets/play.svg").default} alt="Play" /></button>
+                        <button id="pause" className="function-button" onClick={ () => setPlayback("pause") }><img src={require("../style/assets/pause.svg").default} alt="Pause" /></button>
+                        <button id="stf" className="function-button" onClick={ () => setPlayback("skipToFront") }><img src={require("../style/assets/stf.svg").default} alt="Skip to Front" /></button>
+                        <button id="stb" className="function-button" onClick={ () => setPlayback("skipToBack") }><img src={require("../style/assets/stb.svg").default} alt="Skip to Back" /></button>
                     </div>
                     <p id="time-stamp">{convert(duration)}</p>
                     <div id="sound-export">
