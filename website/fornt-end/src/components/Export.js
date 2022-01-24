@@ -26,7 +26,7 @@ let Export = () => {
 
     return(
         <div id="download-file">
-            <button className="function-button" onClick={ exportRec }>Export</button>
+            <button className="function-button" onClick={ exportRec }><img src={require("../style/assets/export.svg").default} alt="Export" /></button>
         </div>
     );
 }
