@@ -6,6 +6,7 @@ from back.models import AudioStorage
 from .encoder import convert_audio
 import os
 import time
+from django.conf import settings
 
 # Create your views here.
 
@@ -18,7 +19,7 @@ class ExportAudioAPI(APIView):
         #!!!!!concerns for sql injection:
         recording = AudioStorage.objects.get(session=session_id)
         print(recording.audio_file.path)
-        dest_path = '.\\temp\\' + file_name + "." + file_format
+        dest_path = settings.MEDIA_ROOT + '\\temp\\' + file_name + "." + file_format
         convert_audio(recording.audio_file.path, file_format, dest_path)
         while(os.path.isfile(dest_path) != True):
             time.sleep(0.5)
