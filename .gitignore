@@ -1,0 +1,10 @@
+# ignore media files
+website/backend/media/
+
+# ignore db file
+website/backend/db.sqlite3
+
+#ignore cache files and migrations
+website/backend/back/__pycache__/
+website/backend/back/migrations/
+website/backend/backend/__pycache__/
