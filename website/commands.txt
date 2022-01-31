@@ -1,0 +1,2 @@
+docker-compose build - to get the image
+docker-compose up - to run the container
