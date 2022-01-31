@@ -2,3 +2,4 @@ Django==3.2.8
 djangorestframework==3.13.1
 django-cors-headers
 pydub==0.25.1
+gunicorn
