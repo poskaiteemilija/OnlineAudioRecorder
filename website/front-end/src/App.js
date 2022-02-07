@@ -1,6 +1,5 @@
 import './style/App.css';
 import Playback from './components/Playback';
-import FrontEndPoint from "./components/FrontEndPoint";
 import {v4 as uuid} from "uuid";
 import { useEffect } from 'react';
 import Localbase from 'localbase';
@@ -27,7 +26,6 @@ function App() {
   return (
     <div className="App">
       <Playback />
-      <FrontEndPoint></FrontEndPoint>
       {/*<footer>
       </footer>*/}
     </div>

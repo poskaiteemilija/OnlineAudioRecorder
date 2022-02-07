@@ -12,6 +12,7 @@ from django.conf import settings
 
 class ExportAudioAPI(APIView):
     def post(self, request, format=None):
+        print("yes?")
         session_id = request.POST['session']
         file_format = request.POST['format']
         file_name = request.POST['filename']
@@ -25,4 +26,5 @@ class ExportAudioAPI(APIView):
             time.sleep(0.5)
 
         return FileResponse(open(dest_path, "rb"))
+
 

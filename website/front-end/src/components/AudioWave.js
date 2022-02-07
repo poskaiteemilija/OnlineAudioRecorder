@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useCallback, useState, useContext } from 'react';
 import WaveSurfer from 'wavesurfer.js';
+import "../style/Wave.css";
 
 let AudioWave = (props) => {
     //const { playbackTime, setPlaybackTime } = useContext(PlaybackContext);
@@ -14,7 +15,6 @@ let AudioWave = (props) => {
         let wavesurfertemp = WaveSurfer.create({
           container: waveformRef.current,
           backgroundColor: "#ffffff",
-
         });
         wavesurfertemp.load(props.audio);
         wavesurfertemp.setCursorColor('#fa95d0');
