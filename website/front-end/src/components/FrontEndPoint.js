@@ -18,7 +18,7 @@ const FrontEndPoint = () =>{
 
         axios({
             method: 'post',
-            url: 'http://127.0.0.1/api/upload/',
+            url: 'http://localhost:8000/api/upload/',        //change to this url when running in docker http://127.0.0.1/api/upload/
             data: formData,
             headers: { "Content-Type": "multipart/form-data" }
         })
@@ -37,7 +37,7 @@ const FrontEndPoint = () =>{
         form.append('filename', 'test');
         axios({
             method: 'post',
-            url: 'http://127.0.0.1/api/export',
+            url: 'http://localhost:8000/api/export',     //change to this url when running in docker http://127.0.0.1/api/export
             data: form,
         })
         .then(resp =>{
