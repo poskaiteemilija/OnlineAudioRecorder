@@ -6,21 +6,24 @@ import ExportPopUp from "./ExportPopUp";
 let Export = () => {
     let db = new Localbase('db');
     const [popUpState, setPopUpState] = useState(false);
-    const [download, setDownload] = useState("");
+    const [download, setDownload] = useState({
+        url: "",
+        name: ""
+    });
     const exportRec = useCallback(() =>{        
         setPopUpState(true);
 
     });
 
     useEffect(() => {
-        if(download !== ""){
+        if(download.url !== "" && download.name !== ""){
             console.log(download);
             //this code has been taken in part and modified from https://github.com/michalstocki/FlashWavRecorder/issues/43
             const a = document.createElement("a");
             let df = document.getElementById("download-file");
             
-            a.href = download;
-            a.download = "onre" + '.mp3';
+            a.href = download.url;
+            a.download = download.name;
             df.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(download);

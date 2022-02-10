@@ -43,7 +43,10 @@ export const getData = (filename, format, setDownload) => {
     })
     .then(resp =>{
         console.log(resp.data);
-        setDownload("http://localhost:8000"+resp.data);
+        setDownload({
+            url: resp.data,
+            name: filename+"."+format
+        });
     })
     .catch(error => {})
 }
