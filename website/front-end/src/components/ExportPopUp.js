@@ -1,16 +1,15 @@
-import react, { useCallback, useState } from "react";
+import react, { useCallback, useEffect, useState } from "react";
 import "../style/ExportPopUp.css";
 import { putData } from "./FrontEndPoint";
 
-const ExportPopUp = ({ setPopUpState }) => {
+const ExportPopUp = ({ setPopUpState, setDownload }) => {
     const [format, setFormat] = useState();
 
     const handleSubmit = useCallback(async (event) => {
         event.preventDefault();
         console.log(format);
         console.log(event.target.filename.value);
-        putData(event.target.filename.value, format);
-        console.log("it's my turn");
+        putData(event.target.filename.value, format, setDownload);
         setPopUpState(false);
         setFormat();
     });

@@ -4,7 +4,7 @@ import { retrieveData } from "./Playback";
 import Localbase from "localbase";
 
 
-export const putData = async (filename, format) => {
+export const putData = async (filename, format, setDownload) => {
     let db = new Localbase('db');
     const data = await retrieveData(db);
     console.log(data[0]);
@@ -22,14 +22,14 @@ export const putData = async (filename, format) => {
     })
     .then(resp => {
         console.log(resp);
-        getData(filename, format);
+        getData(filename, format, setDownload);
     })
     .catch(error => {
         return error;
     });
 }
 
-export const getData = (filename, format) => {
+export const getData = (filename, format, setDownload) => {
     //TO DO implement data check before sending it to the server
     const ses = localStorage.getItem('sessionID');
     let form = new FormData();
@@ -43,22 +43,7 @@ export const getData = (filename, format) => {
     })
     .then(resp =>{
         console.log(resp.data);
-        //let file = new File(resp.data, "ok.mp3", {type: "audio/mp3"});
-        //console.log("aha");
-        //console.log(file);
-        //const url = URL.createObjectURL(file);
-        //console.log("what", url);
-        //const a = document.createElement("a");
-        //let df = document.getElementById("download-file");
-        //
-        //a.href = url;
-        //a.download = "audio" + '.mp3';
-        //df.appendChild(a);
-
-        //a.click();
-
-        //window.URL.revokeObjectURL(url);
-        //df.removeChild(a);
+        setDownload("http://localhost:8000"+resp.data);
     })
     .catch(error => {})
 }
