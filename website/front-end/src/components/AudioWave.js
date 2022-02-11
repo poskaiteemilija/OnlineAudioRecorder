@@ -2,25 +2,39 @@ import React, { useRef, useEffect, useCallback, useState, useContext } from 'rea
 import WaveSurfer from 'wavesurfer.js';
 import "../style/Wave.css";
 
+/*
+        TO DO:
+        delete a track
+        mute a track
+        synchronized playback
+        don't streach the wave to fit the screen (or don't resize other waves in the process of it)
+*/
+
 let AudioWave = (props) => {
     //const { playbackTime, setPlaybackTime } = useContext(PlaybackContext);
 
     const [state, setState] = useState();
     const waveformRef = useRef();
-    const [wavesurfer, setWaveSurfer] = useState();
+    const [wavesurfer, setWaveSurfer] = useState({value: []});
 
     useEffect(() => {
       document.getElementById("wave").innerHTML = "";
       if(waveformRef.current) {
-        let wavesurfertemp = WaveSurfer.create({
-          container: waveformRef.current,
-          backgroundColor: "#ffffff",
-        });
-        wavesurfertemp.load(props.audio);
-        wavesurfertemp.setCursorColor('#fa95d0');
-        wavesurfertemp.setHeight("200")
+        const audioRecs = props.audio.value;
+        audioRecs.forEach(recording => {
+          let wavesurfertemp = WaveSurfer.create({
+            container: waveformRef.current,
+            backgroundColor: "#ffffff",
+          });
+          wavesurfertemp.load(recording.rec);
+          wavesurfertemp.setCursorColor('#fa95d0');
+          wavesurfertemp.setHeight("200");
+          let newList = wavesurfer.value;
+          newList.push(wavesurfertemp);
+          setWaveSurfer({value: newList});
+        }); 
         //setBackgroundColor()
-        setWaveSurfer(wavesurfertemp);
+        
         setState(true);
       }
     }, [props.audio]);
@@ -49,8 +63,10 @@ let AudioWave = (props) => {
     }, [props.playback]);
     
     const onPlay = useCallback(() => {
-      console.log(wavesurfer);
-        wavesurfer.play();
+      wavesurfer.value.forEach(track => {
+        track.play();
+      });
+        //wavesurfer.play();
     });
 
     const onPause = useCallback(() =>{

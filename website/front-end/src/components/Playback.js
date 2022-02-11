@@ -18,10 +18,9 @@ export async function retrieveData(db){
 let Playback = () =>{
     //const PlaybackContext = React.useContext(0); 
 
-    const [audioState, setAudio] = useState();
+    const [audioState, setAudio] = useState({value: []});
     const [recState, setRecord] = useState({record: false});
-    //const [audForV, setAudForV] =  useState();
-    const [duration, setDuration] = useState(0);
+    const [duration, setDuration] = useState({value: [0]});
     const [playback, setPlayback] = useState();
 
     let db = new Localbase('db');
@@ -30,9 +29,30 @@ let Playback = () =>{
         db.collection('audio').add(recordedBlob);
         let audio = new Audio();
         audio.src = recordedBlob.blobURL;
-        setAudio(audio.cloneNode());
-        setDuration(recordedBlob.stopTime - recordedBlob.startTime);
-        //setAudForV(audio.cloneNode());
+        const recDur = recordedBlob.stopTime - recordedBlob.startTime;
+        if(audioState.value !== []){
+            let newList = audioState.value;
+            const newRec = {
+                rec: audio.cloneNode(),
+                dur: recDur
+            };
+            newList.push(newRec);
+            setAudio({value: newList});
+            const newDur = duration.value;
+            newDur.push(recDur);
+            setDuration({value: newDur});
+        }
+        else{
+            const newRec = {
+                rec: audio.cloneNode(),
+                dur: recDur
+            };
+            const newList = [newRec]
+            setAudio({value: newList});
+            const newDur = [recDur];
+            setDuration({value: newDur});
+        }
+        
       });
 
     const stopBut = useCallback(() => {
@@ -63,7 +83,7 @@ let Playback = () =>{
                         <button id="stf" className="function-button" onClick={ () => setPlayback("skipToFront") }><img src={require("../style/assets/stf.svg").default} alt="Skip to Front" /></button>
                         <button id="stb" className="function-button" onClick={ () => setPlayback("skipToBack") }><img src={require("../style/assets/stb.svg").default} alt="Skip to Back" /></button>
                     </div>
-                    <p id="time-stamp">{convert(duration)}</p>
+                    <p id="time-stamp">{convert(Math.max(...duration.value))}</p>
                     <div id="sound-export">
                         <ReactMic
                             record={ recState.record }
@@ -77,7 +97,7 @@ let Playback = () =>{
                 </div>
                 {/*<PlaybackContext.Provider value={duration}>*/}
                 <div id="recording-pane">
-                    <TimeScale dur = {duration} />
+                    <TimeScale dur = {Math.max(...duration.value)} />
                     <RecordingState data = { audioState } playback={playback}/>
                 </div>
                 {/*</PlaybackContext.Provider>*/}                

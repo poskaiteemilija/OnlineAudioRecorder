@@ -6,8 +6,7 @@ function RecordingState (props) {
         //console.log("THIS HAS CHANGED", props.data);
     }, [props.data]);
 
-    //console.log(props.data);
-    if(props.data!=undefined){
+    if(props.data.value.length !== 0){
         return (
             <AudioWave audio={props.data} playback={props.playback}/>        
         );
