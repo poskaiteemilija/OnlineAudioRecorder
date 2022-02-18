@@ -6,7 +6,7 @@ import "../style/Wave.css";
         TO DO:
         delete a track
         mute a track
-        synchronized playback
+        -- synchronized playback
         don't streach the wave to fit the screen (or don't resize other waves in the process of it)
 */
 
@@ -18,23 +18,52 @@ let AudioWave = (props) => {
     const [wavesurfer, setWaveSurfer] = useState({value: []});
 
     useEffect(() => {
-      document.getElementById("wave").innerHTML = "";
+      let wave = document.getElementById("wave");
+      wave.innerHTML = "";
+
+
       if(waveformRef.current) {
         const audioRecs = props.audio.value;
+        let maxVal = 0;
+
+        audioRecs.forEach(rec => {
+          console.log(rec.dur);
+          if(maxVal <= rec.dur){
+            console.log('what');
+            maxVal = rec.dur;
+          }
+          console.log(maxVal);
+        });
+        console.log(maxVal);
+
         audioRecs.forEach(recording => {
+          const duration = recording.dur;
+          const parentDiv = document.createElement("div");
+
           let wavesurfertemp = WaveSurfer.create({
-            container: waveformRef.current,
+            container: parentDiv,
+            fillParent: true,
+            minPxPerSec: 200,
             backgroundColor: "#ffffff",
           });
+
           wavesurfertemp.load(recording.rec);
           wavesurfertemp.setCursorColor('#fa95d0');
           wavesurfertemp.setHeight("200");
+
+          if(duration !== maxVal){
+            const percentage = duration/maxVal;
+            parentDiv.style.width = (wave.clientWidth*percentage) + "px";
+          }
+          
+          wave.appendChild(parentDiv);
+
           let newList = wavesurfer.value;
           newList.push(wavesurfertemp);
           setWaveSurfer({value: newList});
         }); 
         //setBackgroundColor()
-        
+
         setState(true);
       }
     }, [props.audio]);
@@ -70,22 +99,41 @@ let AudioWave = (props) => {
     });
 
     const onPause = useCallback(() =>{
-      wavesurfer.pause();
+      wavesurfer.value.forEach(track => {
+        track.pause();
+      });
+      
+      //wavesurfer.pause();
     });
 
     const skipToFront = useCallback(() => {
-      wavesurfer.pause();
-      wavesurfer.seekTo(0);
-      wavesurfer.play();
+      wavesurfer.value.forEach(track => {
+        track.pause();
+        track.seekTo(0);
+        track.play();
+      });
+
+      //wavesurfer.pause();
+      //wavesurfer.seekTo(0);
+      //wavesurfer.play();
     });
 
     const onStop = useCallback(() => {
-      wavesurfer.stop();
+      wavesurfer.value.forEach(track => {
+        track.stop();
+      });
+      
+      //wavesurfer.stop();
     });
 
     const skipToBack = useCallback(() => {
-      wavesurfer.stop();
-      wavesurfer.seekTo(1);
+      wavesurfer.value.forEach(track => {
+        track.stop();
+        track.seekTo(1);
+      });
+
+      //wavesurfer.stop();
+      //wavesurfer.seekTo(1);
     });
 
     return(

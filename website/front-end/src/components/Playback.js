@@ -71,7 +71,7 @@ let Playback = () =>{
         const miliseconds = milis - Math.floor(milis/1000)*1000;
         return (minutes < 10 ? '0' : '') + minutes + ":" + (seconds < 10 ? '0' : '') + seconds + '\'' + (miliseconds < 100 ? '0' : '') + (miliseconds < 10 ? '0' : '') + miliseconds;
     });
-    
+
     return(
         <div className="playback">
                 <div id="recording-control-panel">
@@ -98,7 +98,7 @@ let Playback = () =>{
                 {/*<PlaybackContext.Provider value={duration}>*/}
                 <div id="recording-pane">
                     <TimeScale dur = {Math.max(...duration.value)} />
-                    <RecordingState data = { audioState } playback={playback}/>
+                    <RecordingState data = { audioState } playback={playback} />
                 </div>
                 {/*</PlaybackContext.Provider>*/}                
         </div>
