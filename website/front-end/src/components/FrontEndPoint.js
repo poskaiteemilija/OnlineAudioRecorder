@@ -9,28 +9,33 @@ export const putData = async (filename, format, setDownload) => {
     const data = await retrieveData(db);
     console.log(data[0]);
     const ses = localStorage.getItem("sessionID");
-    const file = new File([data[0].blob], ses+".webm", {type: "audio/webm"});
-    console.log(file);
     let formData = new FormData();
-    formData.append("session", localStorage.getItem("sessionID"));
-    formData.append("audio_file", file);
-    axios({
-        method: 'post',
-        url: 'http://localhost:8000/api/upload/',        //change to this url when running in docker http://127.0.0.1/api/upload/
-        data: formData,
-        headers: { "Content-Type": "multipart/form-data" }
-    })
-    .then(resp => {
-        console.log(resp);
-        getData(filename, format, setDownload);
-    })
-    .catch(error => {
-        return error;
-    });
+    for(let i = 0; i<data.length; i++){
+        const file = new File([data[i].blob], ses+"_"+i+".webm", {type: "audio/webm"});
+        console.log(file);
+        formData.append("audio_file", file);
+        formData.append("session", localStorage.getItem("sessionID"));
+        await axios({
+            method: 'post',
+            url: 'http://localhost:8000/api/upload/',        //change to this url when running in docker http://127.0.0.1/api/upload/
+            data: formData,
+            headers: { "Content-Type": "multipart/form-data" }
+        })
+        .then(resp => {
+            console.log(resp);
+        })
+        .catch(error => {
+            return error;
+        });
+        console.log("sent 1");
+    }
+    console.log("after both requests");
+    getData(filename, format, setDownload);
 }
 
 export const getData = (filename, format, setDownload) => {
     //TO DO implement data check before sending it to the server
+    console.log("im already doing this");
     const ses = localStorage.getItem('sessionID');
     let form = new FormData();
     form.append('session', ses);
