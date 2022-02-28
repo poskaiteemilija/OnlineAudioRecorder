@@ -15,8 +15,7 @@ class ExportAudioAPI(APIView):
     def post(self, request, format=None):
         session_id = request.POST['session']
         file_format = request.POST['format']
-        file_name = request.POST['filename']
-        print(session_id, file_format, file_name)
+        print(session_id, file_format)
         #!!!!!concerns for sql injection:
         recordings = AudioStorage.objects.filter(session=session_id)
         
@@ -26,13 +25,16 @@ class ExportAudioAPI(APIView):
         while(os.path.isfile(dest_path) != True):
             time.sleep(0.5)
 
-        new_file = open(dest_path, "rb")
         objs = AudioStorage.objects.filter(session=session_id)
         for obj in objs:
+            os.remove(obj.audio_file.path)
             obj.delete()
 
-        AudioStorage.objects.create(session=session_id, audio_file=File(new_file))
+        new_rec = AudioStorage()
+        new_rec.session = session_id
+        new_rec.audio_file.name = dest_path
+        new_rec.save()
+        
         link = AudioStorage.objects.get(session=session_id).audio_file.url
-        #os.remove(dest_path)
 
         return HttpResponse(link, content_type='text/plain')

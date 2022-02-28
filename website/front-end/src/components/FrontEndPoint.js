@@ -40,7 +40,6 @@ export const getData = (filename, format, setDownload) => {
     let form = new FormData();
     form.append('session', ses);
     form.append('format', format);
-    form.append('filename', filename);
     axios({
         method: 'post',
         url: 'http://localhost:8000/api/export',     //change to this url when running in docker http://127.0.0.1/api/export
