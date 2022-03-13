@@ -78,6 +78,20 @@ let AudioWave = (props) => {
           wavesurfertemp.setCursorColor('#fa95d0');
           wavesurfertemp.setHeight("200");
 
+          wavesurfertemp.on("seek", () => {
+            wavesurfertemp.clearRegions();
+          });
+
+          wavesurfertemp.enableDragSelection(
+            {
+              id: "selected",   
+              start: 0,
+              end: 1,
+              loop: false,
+              color: '#cccccc'
+            }
+          );
+
           if(duration !== maxVal){
             const percentage = duration/maxVal;
             parentDiv.style.width = (wave.clientWidth*percentage) + "px";
@@ -184,8 +198,7 @@ let AudioWave = (props) => {
 
     return(
       <div>
-        <div ref={waveformRef} id="wave"></div>       
-        <WaveWrapper audio={props.audio.value[0]}></WaveWrapper>
+        <div ref={waveformRef} id="wave"></div>
       </div>
       
     );
