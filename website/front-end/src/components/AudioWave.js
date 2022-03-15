@@ -3,7 +3,7 @@ import WaveSurfer from 'wavesurfer.js';
 import RegionsPlugin from 'wavesurfer.js/dist/plugin/wavesurfer.regions.js';
 import "../style/Wave.css";
 
-import WaveWrapper from "./WaveWrapper";
+import CustomMenu from "./CustomMenu.js";
 
 //import ControlDiv from "./ControlDiv";
 
@@ -22,6 +22,10 @@ let AudioWave = (props) => {
     const waveformRef = useRef();
     const [wavesurfer, setWaveSurfer] = useState({value: []});
     const [region, setRegion] = useState(false);
+    const [anchorPoint, setAnchorPoint] = useState({x:0, y:0});
+    const [showMenu, setMenu] = useState(false);
+    const [option, setOption] = useState("");
+    const [currentTrack, setCurrentTrack] = useState({});
 
     useEffect(() => {
       let wave = document.getElementById("wave");
@@ -79,7 +83,11 @@ let AudioWave = (props) => {
           wavesurfertemp.setHeight("200");
 
           wavesurfertemp.on("seek", () => {
-            wavesurfertemp.clearRegions();
+            //wavesurfertemp.clearRegions();
+            if(showMenu == true){
+              console.log("im here");
+              setMenu(false);
+            }
           });
 
           wavesurfertemp.enableDragSelection(
@@ -91,6 +99,20 @@ let AudioWave = (props) => {
               color: '#cccccc'
             }
           );
+
+          wavesurfertemp.on("region-mouseenter", (region, mouseenter) => {
+            console.log("region event");
+            console.log(region);
+            console.log(mouseenter);
+            document.addEventListener("contextmenu", (event) => {
+              event.preventDefault();
+              setAnchorPoint({x: event.pageY, y: event.pageX});
+              setCurrentTrack(region);
+              console.log(region);
+              setMenu(true);
+            });
+            //wavesurfertemp.clearRegions();
+          });
 
           if(duration !== maxVal){
             const percentage = duration/maxVal;
@@ -134,36 +156,60 @@ let AudioWave = (props) => {
       
     }, [props.playback]);
 
-    const onRegionSelect = useCallback((trackIndex) => {
-      console.log(trackIndex);
-      //let wave = wavesurfer.value[trackIndex];
-      console.log(wavesurfer.value)
-      //console.log(wave);
-      //temp code to test function taken from https://stackoverflow.com/questions/60503478/how-do-i-play-a-region-and-only-the-region-on-wavesurfer-js
-      /*wave.addRegion(
-        {
-          id: trackIndex + "smt",   
-          start: 0,
-          end: 1,
-          loop: false,
-          color: '#cccccc'
+    useEffect(() => {
+      if(option != ""){
+        console.log("in useEffect");
+        console.log(currentTrack);
+        switch(option){
+          case "copy":
+
+            break;
+          case "cut":
+            break;
+          case "paste":
+            break;
+          case "delete":
+            onDelete();
+            break;
         }
-      );*/
+      }
+
+      setOption("");
+      setMenu(false);
+    }, [option]);
+
+    const onCopy = useCallback(() => {
+
+    });
+
+    const onCut = useCallback(() => {
+
+    });
+
+    const onPaste = useCallback(() => {
+
+    });
+
+    const onDelete = useCallback(() => {
+      //https://mitya.uk/articles/concatenating-audio-pure-javascript
+      //https://github.com/streamproc/MediaStreamRecorder
+      const cT = currentTrack;
+      console.log("here");
+      console.log(cT);
+      console.log(cT.start);
+      console.log(cT.end);
     });
     
     const onPlay = useCallback(() => {
       wavesurfer.value.forEach(track => {
         track.play();
       });
-        //wavesurfer.play();
     });
 
     const onPause = useCallback(() =>{
       wavesurfer.value.forEach(track => {
         track.pause();
       });
-      
-      //wavesurfer.pause();
     });
 
     const skipToFront = useCallback(() => {
@@ -172,18 +218,12 @@ let AudioWave = (props) => {
         track.seekTo(0);
         track.play();
       });
-
-      //wavesurfer.pause();
-      //wavesurfer.seekTo(0);
-      //wavesurfer.play();
     });
 
     const onStop = useCallback(() => {
       wavesurfer.value.forEach(track => {
         track.stop();
       });
-      
-      //wavesurfer.stop();
     });
 
     const skipToBack = useCallback(() => {
@@ -191,13 +231,11 @@ let AudioWave = (props) => {
         track.stop();
         track.seekTo(1);
       });
-
-      //wavesurfer.stop();
-      //wavesurfer.seekTo(1);
     });
 
     return(
       <div>
+        <CustomMenu showMenu = {showMenu} anchorPoint = {anchorPoint} setOption = {setOption}></CustomMenu>
         <div ref={waveformRef} id="wave"></div>
       </div>
       

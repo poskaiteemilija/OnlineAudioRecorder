@@ -1,0 +1,13 @@
+#contextMenu {
+    z-index: 999;
+    position: absolute;
+    background-color: white;
+    list-style: none;
+    padding: 0em;
+}
+
+#contextMenu li{
+    border-bottom: solid black 0.25px;
+    padding: 0.1em 0.5em;
+    font-size: 1.25em;
+}
