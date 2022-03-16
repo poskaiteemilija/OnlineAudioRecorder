@@ -98,7 +98,7 @@ let Playback = () =>{
                 {/*<PlaybackContext.Provider value={duration}>*/}
                 <div id="recording-pane">
                     <TimeScale dur = {Math.max(...duration.value)} />
-                    <RecordingState data = { audioState } playback={playback} />
+                    <RecordingState data = { audioState } playback={playback} setAudio = {setAudio}/>
                 </div>
                 {/*</PlaybackContext.Provider>*/}                
         </div>

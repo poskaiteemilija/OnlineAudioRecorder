@@ -1,9 +1,11 @@
+import Localbase from 'localbase';
 import React, { useRef, useEffect, useCallback, useState, useContext } from 'react';
 import WaveSurfer from 'wavesurfer.js';
 import RegionsPlugin from 'wavesurfer.js/dist/plugin/wavesurfer.regions.js';
 import "../style/Wave.css";
 
 import CustomMenu from "./CustomMenu.js";
+import ConcatenateBlobs from "concatenateblobs";
 
 //import ControlDiv from "./ControlDiv";
 
@@ -17,6 +19,7 @@ import CustomMenu from "./CustomMenu.js";
 
 let AudioWave = (props) => {
     //const { playbackTime, setPlaybackTime } = useContext(PlaybackContext);
+    const db = new Localbase("db");
 
     const [state, setState] = useState();
     const waveformRef = useRef();
@@ -108,7 +111,6 @@ let AudioWave = (props) => {
               event.preventDefault();
               setAnchorPoint({x: event.pageY, y: event.pageX});
               setCurrentTrack(region);
-              console.log(region);
               setMenu(true);
             });
             //wavesurfertemp.clearRegions();
@@ -190,14 +192,48 @@ let AudioWave = (props) => {
 
     });
 
-    const onDelete = useCallback(() => {
+    const onDelete = useCallback(async () => {
       //https://mitya.uk/articles/concatenating-audio-pure-javascript
       //https://github.com/streamproc/MediaStreamRecorder
       const cT = currentTrack;
-      console.log("here");
-      console.log(cT);
-      console.log(cT.start);
-      console.log(cT.end);
+      const startTime = cT.start;
+      const endTime = cT.end;
+      
+      let count = 0;
+      let tc = 0;
+      wavesurfer.value.forEach(track => {
+        console.log(track);
+        console.log(track.regions.list);
+        if(track.regions.list.selected != undefined){
+          tc = count
+        }
+        count++;
+      });
+
+      let tempBlob = props.audio.value[tc].rec.src;
+      let dur = props.audio.value[tc].rec.duration;
+      console.log(tempBlob);
+      let blob = await fetch(tempBlob).then(r => r.blob());
+      let recData = [];
+      let newBlob = blob.slice( 0, startTime*10000, {type: "audio/webm;codecs=opus"});
+      let newBlob2 = blob.slice(endTime*10000, dur, {type: "audio/webm;codecs=opus"});
+      console.log(newBlob);
+      console.log(newBlob2);
+      recData.push(newBlob);
+      recData.push(newBlob2);
+      let joinedBlob = new Blob(recData, {type: "audio/webm;codecs=opus"});
+      let link = URL.createObjectURL(joinedBlob);
+      let audio = new Audio();
+      audio.src = link;
+      console.log(joinedBlob, audio);
+      console.log(audio.duration);
+      db.collection("audio").add(joinedBlob);
+      let list = props.audio.value;
+      list[tc] = {
+        rec: audio.cloneNode(),
+        dur: audio.duration
+      };
+      props.setAudio({value: list});
     });
     
     const onPlay = useCallback(() => {
