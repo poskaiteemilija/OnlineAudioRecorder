@@ -1,5 +1,5 @@
 import Localbase from 'localbase';
-import React, { useRef, useEffect, useCallback, useState, useContext } from 'react';
+import React, { useRef, useEffect, useCallback, useState, useContext, useDebugValue } from 'react';
 import WaveSurfer from 'wavesurfer.js';
 import RegionsPlugin from 'wavesurfer.js/dist/plugin/wavesurfer.regions.js';
 import "../style/Wave.css";
@@ -13,9 +13,57 @@ import ConcatenateBlobs from "concatenateblobs";
         TO DO:
         delete a track
         mute a track
-        -- synchronized playback
         -- don't streach the wave to fit the screen (or don't resize other waves in the process of it)
 */
+
+let sliceAudio = async (startTime, endTime, src) => {
+  //the code in this function is taken and combined from these two sources: https://stackoverflow.com/questions/54303632/trim-an-audio-file-using-javascript-first-3-seconds and https://stackoverflow.com/questions/40363335/how-to-create-an-audiobuffer-from-a-blob
+  console.log("this is slice audio");
+  console.log(src, startTime, endTime);
+  const audioCont = new AudioContext();
+  const fileReader = new FileReader();
+
+  let source = audioCont.createBufferSource();
+  let destination = audioCont.createMediaStreamDestination();
+  let mediaRec = new MediaRecorder(destination.stream);
+
+  mediaRec.addEventListener('dataavailable', function(e){
+    console.log(e.data);
+    let a = new Audio();
+    let blobURL = URL.createObjectURL(e.data);
+    a.src = blobURL;
+    a.play();
+
+    //a.src = 
+  });
+  
+  fileReader.onloadend = () => {
+    const arrayBuffer = fileReader.result;
+
+    audioCont.decodeAudioData(arrayBuffer, (audioBuffer) => {
+        console.log(audioBuffer);
+
+        source.buffer = audioBuffer;
+        source.connect(destination);
+        mediaRec.start();
+        
+        const s = Date.now();
+        console.log(startTime, audioCont.currentTime);
+        source.start(audioCont.currentTime, startTime, endTime-startTime);
+        source.addEventListener('ended', e => {
+          const en = Date.now();
+          console.log(en - s);
+          console.log(endTime-startTime);
+          mediaRec.requestData();
+        });
+    });
+  }
+
+  let blob = await fetch(src).then(r => r.blob());
+
+  fileReader.readAsArrayBuffer(blob);
+
+}
 
 let AudioWave = (props) => {
     //const { playbackTime, setPlaybackTime } = useContext(PlaybackContext);
@@ -212,9 +260,15 @@ let AudioWave = (props) => {
 
       let tempBlob = props.audio.value[tc].rec.src;
       let dur = props.audio.value[tc].rec.duration;
+
+      console.log(tempBlob);
+      await sliceAudio(startTime, endTime, tempBlob);
+
+      /*
       console.log(tempBlob);
       let blob = await fetch(tempBlob).then(r => r.blob());
       let recData = [];
+      
       let newBlob = blob.slice( 0, startTime*10000, {type: "audio/webm;codecs=opus"});
       let newBlob2 = blob.slice(endTime*10000, dur, {type: "audio/webm;codecs=opus"});
       console.log(newBlob);
@@ -234,6 +288,7 @@ let AudioWave = (props) => {
         dur: audio.duration
       };
       props.setAudio({value: list});
+      */
     });
     
     const onPlay = useCallback(() => {
