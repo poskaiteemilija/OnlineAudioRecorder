@@ -16,55 +16,6 @@ import ConcatenateBlobs from "concatenateblobs";
         -- don't streach the wave to fit the screen (or don't resize other waves in the process of it)
 */
 
-let sliceAudio = async (startTime, endTime, src) => {
-  //the code in this function is taken and combined from these two sources: https://stackoverflow.com/questions/54303632/trim-an-audio-file-using-javascript-first-3-seconds and https://stackoverflow.com/questions/40363335/how-to-create-an-audiobuffer-from-a-blob
-  console.log("this is slice audio");
-  console.log(src, startTime, endTime);
-  const audioCont = new AudioContext();
-  const fileReader = new FileReader();
-
-  let source = audioCont.createBufferSource();
-  let destination = audioCont.createMediaStreamDestination();
-  let mediaRec = new MediaRecorder(destination.stream);
-
-  mediaRec.addEventListener('dataavailable', function(e){
-    console.log(e.data);
-    let a = new Audio();
-    let blobURL = URL.createObjectURL(e.data);
-    a.src = blobURL;
-    a.play();
-
-    //a.src = 
-  });
-  
-  fileReader.onloadend = () => {
-    const arrayBuffer = fileReader.result;
-
-    audioCont.decodeAudioData(arrayBuffer, (audioBuffer) => {
-        console.log(audioBuffer);
-
-        source.buffer = audioBuffer;
-        source.connect(destination);
-        mediaRec.start();
-        
-        const s = Date.now();
-        console.log(startTime, audioCont.currentTime);
-        source.start(audioCont.currentTime, startTime, endTime-startTime);
-        source.addEventListener('ended', e => {
-          const en = Date.now();
-          console.log(en - s);
-          console.log(endTime-startTime);
-          mediaRec.requestData();
-        });
-    });
-  }
-
-  let blob = await fetch(src).then(r => r.blob());
-
-  fileReader.readAsArrayBuffer(blob);
-
-}
-
 let AudioWave = (props) => {
     //const { playbackTime, setPlaybackTime } = useContext(PlaybackContext);
     const db = new Localbase("db");
@@ -77,6 +28,8 @@ let AudioWave = (props) => {
     const [showMenu, setMenu] = useState(false);
     const [option, setOption] = useState("");
     const [currentTrack, setCurrentTrack] = useState({});
+
+    const [delClip, setDelClip] = useState({delete: []});
 
     useEffect(() => {
       let wave = document.getElementById("wave");
@@ -228,6 +181,88 @@ let AudioWave = (props) => {
       setMenu(false);
     }, [option]);
 
+    useEffect(() => {
+      if(delClip.delete!==[]){
+        console.log("CLIPBOARD UPDATE: ", delClip);
+        if(delClip.delete.length === 2){
+          
+          const first = delClip.delete[0].order === 0 ? 0 : 1;
+          const second = delClip.delete[1].order === 0 ? 0 : 1;
+          const joinedDuration = (delClip.delete[first].duration + delClip.delete[second].duration)*1000;
+          console.log(joinedDuration);
+
+          let joinedBlob = new Blob([delClip.delete[first].data, delClip.delete[second].data], { 'type' : 'audio/ogg; codecs=opus' });
+          let link = URL.createObjectURL(joinedBlob);
+          let audio = new Audio();
+          audio.src = link;
+          audio.onloadedmetadata = function(){
+            console.log(joinedBlob, audio);
+            console.log(joinedDuration);
+            db.collection("audio").add(joinedBlob);
+            let list = props.audio.value;
+            list[delClip.delete[0].track] = {
+              rec: audio.cloneNode(),
+              dur: joinedDuration
+            };
+            props.setAudio({value: list});
+            setDelClip({delete: []});
+          };
+          
+        }
+      }
+    }, [delClip]);
+
+    let sliceAudio = (startTime, endTime, blob, tc, o) => {
+      //check out this alternative way to copy a part of audiobuffer: https://www.npmjs.com/package/audiobuffer-slice
+      //the code in this function is taken and combined from these two sources: https://stackoverflow.com/questions/54303632/trim-an-audio-file-using-javascript-first-3-seconds and https://stackoverflow.com/questions/40363335/how-to-create-an-audiobuffer-from-a-blob
+      console.log("this is slice audio");
+      console.log(blob, startTime, endTime);
+      const audioCont = new AudioContext();
+      const fileReader = new FileReader();
+    
+      let source = audioCont.createBufferSource();
+      let destination = audioCont.createMediaStreamDestination();
+      let mediaRec = new MediaRecorder(destination.stream);
+    
+      mediaRec.addEventListener('dataavailable', function(e){
+        console.log(e.data, "DATA GRL");
+        let a = new Audio();
+        let blobURL = URL.createObjectURL(e.data);
+        a.src = blobURL;
+        a.play();
+        
+        let temp = delClip.delete;
+        temp.push({data: e.data, track: tc, order: o, duration: endTime-startTime});
+        
+        setDelClip({delete: temp});
+      });
+      
+      fileReader.onloadend = () => {
+        const arrayBuffer = fileReader.result;
+    
+        audioCont.decodeAudioData(arrayBuffer, (audioBuffer) => {
+            console.log(audioBuffer);
+    
+            source.buffer = audioBuffer;
+            source.connect(destination);
+            mediaRec.start();
+            
+            const s = Date.now();
+            console.log(startTime, endTime, audioCont.currentTime);
+            source.start(audioCont.currentTime, startTime, endTime-startTime);
+            source.addEventListener('ended', e => {
+              const en = Date.now();
+              console.log(en - s);
+              console.log(endTime-startTime);
+              mediaRec.requestData();
+            });
+        });
+      }
+    
+      fileReader.readAsArrayBuffer(blob);
+    
+    }
+
     const onCopy = useCallback(() => {
 
     });
@@ -259,36 +294,14 @@ let AudioWave = (props) => {
       });
 
       let tempBlob = props.audio.value[tc].rec.src;
-      let dur = props.audio.value[tc].rec.duration;
+      let dur = props.audio.value[tc].dur/1000;
 
-      console.log(tempBlob);
-      await sliceAudio(startTime, endTime, tempBlob);
+      console.log("HEREEEEEEEEEE", tempBlob, dur, props.audio.value[tc]);
 
-      /*
-      console.log(tempBlob);
       let blob = await fetch(tempBlob).then(r => r.blob());
-      let recData = [];
       
-      let newBlob = blob.slice( 0, startTime*10000, {type: "audio/webm;codecs=opus"});
-      let newBlob2 = blob.slice(endTime*10000, dur, {type: "audio/webm;codecs=opus"});
-      console.log(newBlob);
-      console.log(newBlob2);
-      recData.push(newBlob);
-      recData.push(newBlob2);
-      let joinedBlob = new Blob(recData, {type: "audio/webm;codecs=opus"});
-      let link = URL.createObjectURL(joinedBlob);
-      let audio = new Audio();
-      audio.src = link;
-      console.log(joinedBlob, audio);
-      console.log(audio.duration);
-      db.collection("audio").add(joinedBlob);
-      let list = props.audio.value;
-      list[tc] = {
-        rec: audio.cloneNode(),
-        dur: audio.duration
-      };
-      props.setAudio({value: list});
-      */
+      sliceAudio(0, startTime, blob, tc, 0);
+      sliceAudio(endTime, dur, blob, tc, 1);
     });
     
     const onPlay = useCallback(() => {
