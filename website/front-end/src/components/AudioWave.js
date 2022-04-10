@@ -27,6 +27,7 @@ let AudioWave = (props) => {
     const [anchorPoint, setAnchorPoint] = useState({x:0, y:0});
     const [showMenu, setMenu] = useState(false);
     const [option, setOption] = useState("");
+    const [currentRegion, setCurrentRegion] = useState({});
     const [currentTrack, setCurrentTrack] = useState({});
 
     const [delClip, setDelClip] = useState({delete: []});
@@ -52,19 +53,6 @@ let AudioWave = (props) => {
 
         audioRecs.forEach(recording => {
           const duration = recording.dur;
-          //const baseDiv = document.createElement("div");
-
-          /*let controlDiv = document.createElement("div");
-          controlDiv.className = "track-control-div";
-        
-          let addRegionButton = document.createElement("button");
-          addRegionButton.innerHTML = "Add Selection"
-          addRegionButton.id = count + "b";
-          addRegionButton.onclick = onRegionSelect;
-        
-          controlDiv.appendChild(addRegionButton);
-          
-          baseDiv.appendChild(controlDiv);*/
           
           const parentDiv = document.createElement("div");
 
@@ -111,10 +99,12 @@ let AudioWave = (props) => {
             document.addEventListener("contextmenu", (event) => {
               event.preventDefault();
               setAnchorPoint({x: event.pageY, y: event.pageX});
-              setCurrentTrack(region);
+              setCurrentRegion(region);
+              setCurrentTrack(region.wavesurfer);
               setMenu(true);
             });
             //wavesurfertemp.clearRegions();
+            
           });
 
           if(duration !== maxVal){
@@ -162,6 +152,7 @@ let AudioWave = (props) => {
     useEffect(() => {
       if(option != ""){
         console.log("in useEffect");
+        console.log(currentRegion);
         console.log(currentTrack);
         switch(option){
           case "copy":
@@ -263,22 +254,9 @@ let AudioWave = (props) => {
     
     }
 
-    const onCopy = useCallback(() => {
+    const getTrackInfo = useCallback(async () => {
+      const cT = currentRegion;
 
-    });
-
-    const onCut = useCallback(() => {
-
-    });
-
-    const onPaste = useCallback(() => {
-
-    });
-
-    const onDelete = useCallback(async () => {
-      //https://mitya.uk/articles/concatenating-audio-pure-javascript
-      //https://github.com/streamproc/MediaStreamRecorder
-      const cT = currentTrack;
       const startTime = cT.start;
       const endTime = cT.end;
       
@@ -300,8 +278,46 @@ let AudioWave = (props) => {
 
       let blob = await fetch(tempBlob).then(r => r.blob());
       
-      sliceAudio(0, startTime, blob, tc, 0);
-      sliceAudio(endTime, dur, blob, tc, 1);
+      return {fb: blob, d: dur, st: startTime, et: endTime, t: tc};
+    });
+
+    const onCopy = useCallback(() => {
+
+    });
+
+    const onCut = useCallback(() => {
+
+    });
+
+    const onPaste = useCallback(() => {
+
+    });
+
+    const onDelete = useCallback(async () => {
+      //https://mitya.uk/articles/concatenating-audio-pure-javascript
+      //https://github.com/streamproc/MediaStreamRecorder
+      const res = await getTrackInfo();
+      const blob = res.fb;
+      const dur = res.d;
+      const startTime = res.st;
+      const endTime = res.et;
+      const tc = res.t;
+
+      /*
+      if(startTime == 0){
+
+      }
+      else if(endTime >= dur){
+
+      }
+      else if(startTime == 0 && endTime >= dur){
+
+      }
+      else{*/
+        sliceAudio(0, startTime, blob, tc, 0);
+        sliceAudio(endTime, dur, blob, tc, 1);
+      //}
+      
     });
     
     const onPlay = useCallback(() => {
