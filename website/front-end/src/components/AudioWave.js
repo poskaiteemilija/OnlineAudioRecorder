@@ -75,22 +75,38 @@ let AudioWave = (props) => {
           wavesurfertemp.setHeight("200");
 
           wavesurfertemp.on("seek", () => {
-            //wavesurfertemp.clearRegions();
-            if(showMenu == true){
-              console.log("im here");
-              setMenu(false);
-            }
+            wavesurfertemp.clearRegions();
+            setMenu(false);
+            //setRegion(false);
           });
 
           wavesurfertemp.enableDragSelection(
             {
-              id: "selected",   
               start: 0,
               end: 1,
               loop: false,
               color: '#cccccc'
             }
           );
+
+          wavesurfertemp.on('region-created', () => {
+            setRegion(true);
+          });
+
+          wavesurfertemp.on('region-removed', () =>{
+            setRegion(false);
+          });
+
+          wavesurfertemp.on('region-updated', (region) => {
+            //this function is taken from: https://stackoverflow.com/questions/60679114/how-to-avoid-multiple-regions-being-created-in-wavesurferjs
+            const regionList = region.wavesurfer.regions.list;
+            //console.log("------------------REGION UPDATE--------------", regionList);
+            const keys = Object.keys(regionList);
+            //console.log(keys, keys.length);
+            if(keys.length > 1){
+              regionList[keys[0]].remove();
+            }
+          });
 
           wavesurfertemp.on("region-mouseenter", (region, mouseenter) => {
             console.log("region event");
@@ -100,7 +116,6 @@ let AudioWave = (props) => {
               event.preventDefault();
               setAnchorPoint({x: event.pageY, y: event.pageX});
               setCurrentRegion(region);
-              setCurrentTrack(region.wavesurfer);
               setMenu(true);
             });
             //wavesurfertemp.clearRegions();
@@ -148,6 +163,32 @@ let AudioWave = (props) => {
       }
       
     }, [props.playback]);
+
+    useEffect(() => {
+      console.log('***************REGIONS*************');
+      console.log(region);
+      if(region === true){
+        wavesurfer.value.forEach(track => {
+          console.log(track);
+          console.log(track.regions.list);
+          if(Object.keys(track.regions.list).length === 0){
+            console.log("this does not get fired");
+            track.disableDragSelection();
+        }
+      });
+      }
+      else{
+        wavesurfer.value.forEach(track => {
+          track.enableDragSelection({
+            start: 0,
+            nd: 1,
+            oop: false,
+            olor: '#cccccc'
+            });
+        })
+      }
+
+    }, [region]);
 
     useEffect(() => {
       if(option != ""){
@@ -202,6 +243,8 @@ let AudioWave = (props) => {
         }
       }
     }, [delClip]);
+
+
 
     let sliceAudio = (startTime, endTime, blob, tc, o) => {
       //check out this alternative way to copy a part of audiobuffer: https://www.npmjs.com/package/audiobuffer-slice
@@ -260,17 +303,15 @@ let AudioWave = (props) => {
       const startTime = cT.start;
       const endTime = cT.end;
       
-      let count = 0;
       let tc = 0;
-      wavesurfer.value.forEach(track => {
-        console.log(track);
-        console.log(track.regions.list);
-        if(track.regions.list.selected != undefined){
-          tc = count
-        }
-        count++;
-      });
 
+      for(let i = 0; i< wavesurfer.value.length; i++){
+        if(Object.keys(wavesurfer.value[i].regions.list).length === 0){
+          tc = i;
+          break;
+        }
+      }
+      
       let tempBlob = props.audio.value[tc].rec.src;
       let dur = props.audio.value[tc].dur/1000;
 
