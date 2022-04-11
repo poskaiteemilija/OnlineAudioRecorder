@@ -8,7 +8,7 @@ function RecordingState (props) {
 
     if(props.data.value.length !== 0){
         return (
-            <AudioWave audio={props.data} playback={props.playback} setAudio={props.setAudio}/>        
+            <AudioWave audio={props.data} playback={props.playback} setAudio={props.setAudio} setTrackCount={props.setTrackCount} trackCount = {props.trackCount}/>        
         );
     }
     return <div/>;

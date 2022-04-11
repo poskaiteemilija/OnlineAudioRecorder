@@ -16,23 +16,23 @@ export async function retrieveData(db){
 }
 
 let Playback = () =>{
-    //const PlaybackContext = React.useContext(0); 
-
     const [audioState, setAudio] = useState({value: []});
     const [recState, setRecord] = useState({record: false});
     const [duration, setDuration] = useState({value: [0]});
     const [playback, setPlayback] = useState();
+    const [trackCount, setTrackCount] = useState({value: -1});
 
     let db = new Localbase('db');
     
     const onStop = useCallback((recordedBlob) => {
-        db.collection('audio').add(recordedBlob);
+        db.collection('audio').add({count: audioState.value.length, blob: recordedBlob});
         let audio = new Audio();
         audio.src = recordedBlob.blobURL;
         const recDur = recordedBlob.stopTime - recordedBlob.startTime;
         if(audioState.value !== []){
             let newList = audioState.value;
             const newRec = {
+                count: trackCount,
                 rec: audio.cloneNode(),
                 dur: recDur
             };
@@ -44,6 +44,7 @@ let Playback = () =>{
         }
         else{
             const newRec = {
+                count: trackCount,
                 rec: audio.cloneNode(),
                 dur: recDur
             };
@@ -53,11 +54,16 @@ let Playback = () =>{
             setDuration({value: newDur});
         }
         
-      });
+    });
+
+    useEffect(() => {
+        console.log("TRACK COUNT UPDATE THIS DOES NOT MAKE ANY SENSE", trackCount);
+    }, [trackCount]);
 
     const stopBut = useCallback(() => {
         if(recState.record === true){
-            setRecord({record: false})
+            setRecord({record: false});
+            setTrackCount({value: trackCount.value+1});
         }
         else{
             setPlayback("stop")
@@ -71,6 +77,8 @@ let Playback = () =>{
         const miliseconds = milis - Math.floor(milis/1000)*1000;
         return (minutes < 10 ? '0' : '') + minutes + ":" + (seconds < 10 ? '0' : '') + seconds + '\'' + (miliseconds < 100 ? '0' : '') + (miliseconds < 10 ? '0' : '') + miliseconds;
     });
+
+    console.log(trackCount);
 
     return(
         <div className="playback">
@@ -98,7 +106,7 @@ let Playback = () =>{
                 {/*<PlaybackContext.Provider value={duration}>*/}
                 <div id="recording-pane">
                     <TimeScale dur = {Math.max(...duration.value)} />
-                    <RecordingState data = { audioState } playback={playback} setAudio = {setAudio}/>
+                    <RecordingState data = { audioState } playback={playback} setAudio = {setAudio} setTrackCount = {setTrackCount} trackCount = {trackCount}/>
                 </div>
                 {/*</PlaybackContext.Provider>*/}                
         </div>

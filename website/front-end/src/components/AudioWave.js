@@ -204,7 +204,7 @@ let AudioWave = (props) => {
           case "paste":
             break;
           case "delete":
-            onDelete();
+            onRegionDelete();
             break;
         }
       }
@@ -304,16 +304,20 @@ let AudioWave = (props) => {
       const endTime = cT.end;
       
       let tc = 0;
+      let dur = 0;
 
       for(let i = 0; i< wavesurfer.value.length; i++){
-        if(Object.keys(wavesurfer.value[i].regions.list).length === 0){
+        console.log(wavesurfer.value[i].regions.list);
+        if(Object.keys(wavesurfer.value[i].regions.list).length === 1){
+          console.log("EXCUSE ME");
           tc = i;
+          dur = wavesurfer.value[i].backend.buffer.duration;
           break;
         }
       }
       
       let tempBlob = props.audio.value[tc].rec.src;
-      let dur = props.audio.value[tc].dur/1000;
+      //let dur = props.audio.value[tc].dur/1000;
 
       console.log("HEREEEEEEEEEE", tempBlob, dur, props.audio.value[tc]);
 
@@ -334,7 +338,7 @@ let AudioWave = (props) => {
 
     });
 
-    const onDelete = useCallback(async () => {
+    const onRegionDelete = useCallback(async () => {
       //https://mitya.uk/articles/concatenating-audio-pure-javascript
       //https://github.com/streamproc/MediaStreamRecorder
       const res = await getTrackInfo();
@@ -344,21 +348,48 @@ let AudioWave = (props) => {
       const endTime = res.et;
       const tc = res.t;
 
-      /*
-      if(startTime == 0){
+      console.log(res, blob, dur, startTime, endTime, tc, "UGBFRKWNOVRLUNHOILEWRNMOVIP#EHILTRNHBKEJUBGN JBNUJKBNUEITKU");
+      
+      if(startTime == 0 && endTime < dur){
+        const emptyBlob = new Blob();
 
-      }
-      else if(endTime >= dur){
+        let temp = delClip.delete;
+        temp.push({data: emptyBlob, track: tc, order: 0, duration: 0});
+        setDelClip({delete: temp});
 
+        sliceAudio(endTime, dur, blob, tc, 1)
       }
-      else if(startTime == 0 && endTime >= dur){
+      else if(endTime >= dur && startTime > 0){
+        const emptyBlob = new Blob();
 
+        let temp = delClip.delete;
+        temp.push({data: emptyBlob, track: tc, order: 1, duration: 0});
+        setDelClip({delete: temp});
+
+        sliceAudio(0, startTime, blob, tc, 0);
       }
-      else{*/
+      else if(startTime === 0 && endTime >= dur){
+        console.log("THE RIGHT PLACE ////////////////////////////");
+        onTrackDelete(tc);
+      }
+      else{
         sliceAudio(0, startTime, blob, tc, 0);
         sliceAudio(endTime, dur, blob, tc, 1);
-      //}
+      }
       
+    });
+
+    const onTrackDelete = useCallback(async (tc) => {
+      let list = props.audio.value;
+      const count = list[tc].count;
+      db.collection('audio').doc({id: count}).get().then(document => {
+        console.log("DELETED TRACK: ", document);
+      });
+
+      
+      list.pop(props.audio.value[tc]);
+      props.setAudio({value: list});
+      props.setTrackCount(props.trackCount-1);
     });
     
     const onPlay = useCallback(() => {
