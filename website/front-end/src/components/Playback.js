@@ -20,13 +20,13 @@ let Playback = () =>{
     const [recState, setRecord] = useState({record: false});
     const [duration, setDuration] = useState({value: [0]});
     const [playback, setPlayback] = useState();
-    const [trackCount, setTrackCount] = useState({value: -1});
+    const [trackCount, setTrackCount] = useState({value: []});
     const [updateList, setUpdateList] = useState(false);
 
     let db = new Localbase('db');
     
     const onStop = useCallback((recordedBlob) => {
-        db.collection('audio').add({count: audioState.value.length, blob: recordedBlob})
+        db.collection('audio').add({count: trackCount.value.length, blob: recordedBlob})
         .then(setUpdateList(true));
         
         
@@ -73,8 +73,10 @@ let Playback = () =>{
 
     const stopBut = useCallback(() => {
         if(recState.record === true){
+            let l = trackCount.value;
+            l.push(0);
+            setTrackCount({value: l});
             setRecord({record: false});
-            setTrackCount({value: trackCount.value+1});
         }
         else{
             setPlayback("stop")

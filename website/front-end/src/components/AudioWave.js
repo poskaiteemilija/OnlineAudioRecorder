@@ -397,7 +397,7 @@ let AudioWave = (props) => {
       list = newList;
       //list.pop(props.audio.value[tc]);
       props.setAudio({value: list});
-      props.setTrackCount({value: props.trackCount.value-1});
+      //props.setTrackCount({value: props.trackCount.value-1});
     });
     
     const onPlay = useCallback(() => {
