@@ -350,7 +350,7 @@ let AudioWave = (props) => {
 
       console.log(res, blob, dur, startTime, endTime, tc, "UGBFRKWNOVRLUNHOILEWRNMOVIP#EHILTRNHBKEJUBGN JBNUJKBNUEITKU");
       
-      if(startTime == 0 && endTime < dur){
+      if(startTime <= 0.1 && dur-endTime > 0.1){
         const emptyBlob = new Blob();
 
         let temp = delClip.delete;
@@ -359,7 +359,7 @@ let AudioWave = (props) => {
 
         sliceAudio(endTime, dur, blob, tc, 1)
       }
-      else if(endTime >= dur && startTime > 0){
+      else if(startTime >= 0.1 && dur-endTime <= 0.1){
         const emptyBlob = new Blob();
 
         let temp = delClip.delete;
@@ -368,7 +368,7 @@ let AudioWave = (props) => {
 
         sliceAudio(0, startTime, blob, tc, 0);
       }
-      else if(startTime === 0 && endTime >= dur){
+      else if(startTime <=0.1 && dur-endTime <= 0.1){
         console.log("THE RIGHT PLACE ////////////////////////////");
         onTrackDelete(tc);
       }
@@ -382,14 +382,22 @@ let AudioWave = (props) => {
     const onTrackDelete = useCallback(async (tc) => {
       let list = props.audio.value;
       const count = list[tc].count;
-      db.collection('audio').doc({id: count}).get().then(document => {
+      console.log(count);
+      db.collection('audio').doc({count: count}).delete().then(document => {
         console.log("DELETED TRACK: ", document);
       });
 
+      let newList = [];
+      for(let i = 0; i<list.length; i++){
+        if(list[i].count != count){
+          newList.push(list[i]);
+        }
+      }
       
-      list.pop(props.audio.value[tc]);
+      list = newList;
+      //list.pop(props.audio.value[tc]);
       props.setAudio({value: list});
-      props.setTrackCount(props.trackCount-1);
+      props.setTrackCount({value: props.trackCount.value-1});
     });
     
     const onPlay = useCallback(() => {

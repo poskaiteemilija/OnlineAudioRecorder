@@ -21,44 +21,55 @@ let Playback = () =>{
     const [duration, setDuration] = useState({value: [0]});
     const [playback, setPlayback] = useState();
     const [trackCount, setTrackCount] = useState({value: -1});
+    const [updateList, setUpdateList] = useState(false);
 
     let db = new Localbase('db');
     
     const onStop = useCallback((recordedBlob) => {
-        db.collection('audio').add({count: audioState.value.length, blob: recordedBlob});
-        let audio = new Audio();
-        audio.src = recordedBlob.blobURL;
-        const recDur = recordedBlob.stopTime - recordedBlob.startTime;
-        if(audioState.value !== []){
-            let newList = audioState.value;
-            const newRec = {
-                count: trackCount,
-                rec: audio.cloneNode(),
-                dur: recDur
-            };
-            newList.push(newRec);
-            setAudio({value: newList});
-            const newDur = duration.value;
-            newDur.push(recDur);
-            setDuration({value: newDur});
-        }
-        else{
-            const newRec = {
-                count: trackCount,
-                rec: audio.cloneNode(),
-                dur: recDur
-            };
-            const newList = [newRec]
-            setAudio({value: newList});
-            const newDur = [recDur];
-            setDuration({value: newDur});
-        }
+        db.collection('audio').add({count: audioState.value.length, blob: recordedBlob})
+        .then(setUpdateList(true));
+        
         
     });
 
     useEffect(() => {
-        console.log("TRACK COUNT UPDATE THIS DOES NOT MAKE ANY SENSE", trackCount);
-    }, [trackCount]);
+        if(updateList === true){
+            db.collection('audio').get().then(doc => {
+                console.log(doc);
+                const recBlob = doc[audioState.value.length].blob;
+                let audio = new Audio();
+                audio.src = recBlob.blobURL;
+                const recDur = recBlob.stopTime - recBlob.startTime;
+                //if(audioState.value !== []){
+                let newList = audioState.value;
+                const newRec = {
+                    count: doc[audioState.value.length].count,
+                    rec: audio.cloneNode(),
+                    dur: recDur
+                };
+                newList.push(newRec);
+                setAudio({value: newList});
+                const newDur = duration.value;
+                newDur.push(recDur);
+                setDuration({value: newDur});
+               //}
+               //else{
+               //    const newRec = {
+               //        count: audioState.value.length,
+               //        rec: audio.cloneNode(),
+               //        dur: recDur
+               //    };
+               //    const newList = [newRec]
+               //    setAudio({value: newList});
+               //    const newDur = [recDur];
+               //    setDuration({value: newDur});
+               //}
+                setUpdateList(false);
+            })
+        }
+        
+        
+    }, [updateList]);
 
     const stopBut = useCallback(() => {
         if(recState.record === true){
