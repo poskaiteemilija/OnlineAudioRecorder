@@ -83,6 +83,8 @@ let Playback = () =>{
         }
     });
 
+    console.log(audioState);
+
     const convert = useCallback((milis) => {
         //this solution has been modified to my needs and takes from this source https://stackoverflow.com/questions/21294302/converting-milliseconds-to-minutes-and-seconds-with-javascript
         const minutes = Math.floor(milis/60000);
@@ -90,8 +92,6 @@ let Playback = () =>{
         const miliseconds = milis - Math.floor(milis/1000)*1000;
         return (minutes < 10 ? '0' : '') + minutes + ":" + (seconds < 10 ? '0' : '') + seconds + '\'' + (miliseconds < 100 ? '0' : '') + (miliseconds < 10 ? '0' : '') + miliseconds;
     });
-
-    console.log(trackCount);
 
     return(
         <div className="playback">

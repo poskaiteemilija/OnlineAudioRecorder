@@ -70,6 +70,8 @@ let AudioWave = (props) => {
             ]
           });
 
+          console.log(recording.rec);
+
           wavesurfertemp.load(recording.rec);
           wavesurfertemp.setCursorColor('#fa95d0');
           wavesurfertemp.setHeight("200");
@@ -223,22 +225,25 @@ let AudioWave = (props) => {
           const joinedDuration = (delClip.delete[first].duration + delClip.delete[second].duration)*1000;
           console.log(joinedDuration);
 
-          let joinedBlob = new Blob([delClip.delete[first].data, delClip.delete[second].data], { 'type' : 'audio/ogg; codecs=opus' });
+          let joinedBlob = new Blob([delClip.delete[first].data, delClip.delete[second].data], { type : 'audio/webm;codecs=opus' });
           let link = URL.createObjectURL(joinedBlob);
           let audio = new Audio();
           audio.src = link;
-          audio.onloadedmetadata = function(){
+          audio.play();
             console.log(joinedBlob, audio);
             console.log(joinedDuration);
-            db.collection("audio").add(joinedBlob);
             let list = props.audio.value;
+            const count = list[delClip.delete[0].track].count;
+            db.collection("audio").doc({count: count}).delete().then(() =>{
+              db.collection("audio").add({count: count, blob: joinedBlob});
+            });
             list[delClip.delete[0].track] = {
+              count: count,
               rec: audio.cloneNode(),
               dur: joinedDuration
             };
             props.setAudio({value: list});
             setDelClip({delete: []});
-          };
           
         }
       }
@@ -256,17 +261,21 @@ let AudioWave = (props) => {
     
       let source = audioCont.createBufferSource();
       let destination = audioCont.createMediaStreamDestination();
-      let mediaRec = new MediaRecorder(destination.stream);
+      let mediaRec = new MediaRecorder(destination.stream, {
+        mimeType: "audio/webm;codecs=opus"
+      });
     
       mediaRec.addEventListener('dataavailable', function(e){
         console.log(e.data, "DATA GRL");
+        const b = new Blob([e.data], {type: "audio/webm;codecs=opus"});
         let a = new Audio();
+        console.log(e.data);
         let blobURL = URL.createObjectURL(e.data);
         a.src = blobURL;
-        a.play();
+        //a.play();
         
         let temp = delClip.delete;
-        temp.push({data: e.data, track: tc, order: o, duration: endTime-startTime});
+        temp.push({data: b, track: tc, order: o, duration: endTime-startTime});
         
         setDelClip({delete: temp});
       });
@@ -280,14 +289,10 @@ let AudioWave = (props) => {
             source.buffer = audioBuffer;
             source.connect(destination);
             mediaRec.start();
-            
-            const s = Date.now();
+        
             console.log(startTime, endTime, audioCont.currentTime);
             source.start(audioCont.currentTime, startTime, endTime-startTime);
             source.addEventListener('ended', e => {
-              const en = Date.now();
-              console.log(en - s);
-              console.log(endTime-startTime);
               mediaRec.requestData();
             });
         });
