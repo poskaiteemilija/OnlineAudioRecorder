@@ -6,6 +6,7 @@ import "../style/Wave.css";
 
 import CustomMenu from "./CustomMenu.js";
 import ConcatenateBlobs from "concatenateblobs";
+import AudioBufferSlice from "audiobuffer-slice";
 
 //import ControlDiv from "./ControlDiv";
 
@@ -219,7 +220,7 @@ let AudioWave = (props) => {
       if(delClip.delete!==[]){
         console.log("CLIPBOARD UPDATE: ", delClip);
         if(delClip.delete.length === 2){
-          
+          /*
           const first = delClip.delete[0].order === 0 ? 0 : 1;
           const second = delClip.delete[1].order === 0 ? 0 : 1;
           const joinedDuration = (delClip.delete[first].duration + delClip.delete[second].duration)*1000;
@@ -244,19 +245,40 @@ let AudioWave = (props) => {
             };
             props.setAudio({value: list});
             setDelClip({delete: []});
-          
+          */
+            const first = delClip.delete[0].order === 0 ? 0 : 1;
+            const second = delClip.delete[1].order === 0 ? 0 : 1;
+
+            const buffer1 = delClip.delete[first].data;
+            const buffer2 = delClip.delete[second].data;
+            const recordingAudioContext = new AudioContext();
+            const numberOfChannels = Math.min(buffer1.numberOfChannels, buffer2.numberOfChannels);
+            var tmp = recordingAudioContext.createBuffer(numberOfChannels, (buffer1.length + buffer2.length), buffer1.sampleRate);
+            for (var i = 0; i < numberOfChannels; i++) {
+                var channel = tmp.getChannelData(i);
+                channel.set(buffer1.getChannelData(i), 0);
+                channel.set(buffer2.getChannelData(i), buffer1.length);
+            }
+            console.log(tmp);
+            const blob = new Blob([tmp], {type: "audio/webm;codecs=opus"});
+            console.log(blob);
+            let audio = new Audio();
+            const bloburl = URL.createObjectURL(blob);
+            audio.src = bloburl;
+            audio.play();
+            setDelClip({delete: []});
         }
       }
     }, [delClip]);
 
 
 
-    let sliceAudio = (startTime, endTime, blob, tc, o) => {
+    let sliceAudio = (trackStart, startTime, endTime, duration, blob, tc, o) => {
       //check out this alternative way to copy a part of audiobuffer: https://www.npmjs.com/package/audiobuffer-slice
       //the code in this function is taken and combined from these two sources: https://stackoverflow.com/questions/54303632/trim-an-audio-file-using-javascript-first-3-seconds and https://stackoverflow.com/questions/40363335/how-to-create-an-audiobuffer-from-a-blob
       console.log("this is slice audio");
-      console.log(blob, startTime, endTime);
-      const audioCont = new AudioContext();
+      console.log(trackStart, startTime, endTime, duration, blob, tc, o);
+      /*const audioCont = new AudioContext();
       const fileReader = new FileReader();
     
       let source = audioCont.createBufferSource();
@@ -299,7 +321,46 @@ let AudioWave = (props) => {
       }
     
       fileReader.readAsArrayBuffer(blob);
-    
+      */
+
+      const audioCont = new AudioContext();
+      const fileReader = new FileReader();
+
+      fileReader.onloadend = () => {
+        const arrayBuffer = fileReader.result;
+        console.log(arrayBuffer);
+        audioCont.decodeAudioData(arrayBuffer, (audioBuffer) => {
+          //let source1 = audioCont.createBufferSource();
+          AudioBufferSlice(audioBuffer, trackStart*1000, startTime*1000,function(error, slicedAudioBuffer){
+            if(error){
+              console.error(error);
+            }
+            else{
+              //source1.buffer = slicedAudioBuffer;
+              console.log(slicedAudioBuffer);
+              let temp = delClip.delete;
+              temp.push({data: slicedAudioBuffer, track: tc, order: o, duration: slicedAudioBuffer.duration});
+              setDelClip({delete: temp});
+            }
+          });
+          //let source2 = audioCont.createBufferSource();
+          AudioBufferSlice(audioBuffer, endTime*1000, duration*1000,function(error, slicedAudioBuffer){
+            if(error){
+              console.error(error);
+            }
+            else{
+              //source2.buffer = slicedAudioBuffer;
+              console.log(slicedAudioBuffer);
+              let temp = delClip.delete;
+              temp.push({data: slicedAudioBuffer, track: tc, order: o, duration: slicedAudioBuffer.duration});
+              setDelClip({delete: temp});
+            }
+          });
+        });
+        console.log("this complicates matters");
+      }
+
+      fileReader.readAsArrayBuffer(blob);
     }
 
     const getTrackInfo = useCallback(async () => {
@@ -355,7 +416,7 @@ let AudioWave = (props) => {
 
       console.log(res, blob, dur, startTime, endTime, tc, "UGBFRKWNOVRLUNHOILEWRNMOVIP#EHILTRNHBKEJUBGN JBNUJKBNUEITKU");
       
-      if(startTime <= 0.1 && dur-endTime > 0.1){
+      /*if(startTime <= 0.1 && dur-endTime > 0.1){
         const emptyBlob = new Blob();
 
         let temp = delClip.delete;
@@ -377,10 +438,10 @@ let AudioWave = (props) => {
         console.log("THE RIGHT PLACE ////////////////////////////");
         onTrackDelete(tc);
       }
-      else{
-        sliceAudio(0, startTime, blob, tc, 0);
-        sliceAudio(endTime, dur, blob, tc, 1);
-      }
+      else{*/
+        sliceAudio(0, startTime, endTime, dur, blob, tc, 0);
+        //sliceAudio(endTime, dur, blob, tc, 1);
+      //}
       
     });
 
