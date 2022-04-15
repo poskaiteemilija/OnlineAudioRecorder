@@ -1,12 +1,15 @@
 import Localbase from 'localbase';
 import React, { useRef, useEffect, useCallback, useState, useContext, useDebugValue } from 'react';
-import WaveSurfer from 'wavesurfer.js';
+import WaveSurfer, { util } from 'wavesurfer.js';
 import RegionsPlugin from 'wavesurfer.js/dist/plugin/wavesurfer.regions.js';
 import "../style/Wave.css";
 
 import CustomMenu from "./CustomMenu.js";
 import ConcatenateBlobs from "concatenateblobs";
 import AudioBufferSlice from "audiobuffer-slice";
+import utils from "audio-buffer-utils";
+import audioEncoder from "audio-encoder";
+
 
 //import ControlDiv from "./ControlDiv";
 
@@ -245,27 +248,64 @@ let AudioWave = (props) => {
             };
             props.setAudio({value: list});
             setDelClip({delete: []});
-          */
+            
+            */
             const first = delClip.delete[0].order === 0 ? 0 : 1;
             const second = delClip.delete[1].order === 0 ? 0 : 1;
 
             const buffer1 = delClip.delete[first].data;
             const buffer2 = delClip.delete[second].data;
+            const trackCount = delClip.delete[0].track;
             const recordingAudioContext = new AudioContext();
+            console.log(buffer1, first, buffer2, second);
+            /*
             const numberOfChannels = Math.min(buffer1.numberOfChannels, buffer2.numberOfChannels);
             var tmp = recordingAudioContext.createBuffer(numberOfChannels, (buffer1.length + buffer2.length), buffer1.sampleRate);
             for (var i = 0; i < numberOfChannels; i++) {
                 var channel = tmp.getChannelData(i);
                 channel.set(buffer1.getChannelData(i), 0);
                 channel.set(buffer2.getChannelData(i), buffer1.length);
+                console.log(tmp);
             }
-            console.log(tmp);
-            const blob = new Blob([tmp], {type: "audio/webm;codecs=opus"});
-            console.log(blob);
-            let audio = new Audio();
-            const bloburl = URL.createObjectURL(blob);
-            audio.src = bloburl;
-            audio.play();
+            
+            console.log(tmp);*/
+            const newbuf = utils.concat([buffer1, buffer2]);
+            console.log(newbuf);
+            const joinedDuration = newbuf.duration*1000;
+
+            // this snippet was taken from https://stackoverflow.com/questions/62172398/convert-audiobuffer-to-arraybuffer-blob-for-wav-download
+            //const [left, right] =  [newbuf.getChannelData(0), newbuf.getChannelData(1)]
+//
+            //// interleaved
+            //const interleaved = new Float32Array(left.length + right.length)
+            //for (let src=0, dst=0; src < left.length; src++, dst+=2) {
+            //  interleaved[dst] =   left[src]
+            //  interleaved[dst+1] = right[src]
+            //}
+
+            //snippet ends here
+
+            audioEncoder(newbuf, 0, null, function onComplete(finalblob){
+              //const blob = new Blob([interleaved], {'type': "audio/webm;codecs=opus"});
+              let audio = new Audio();
+              const bloburl = URL.createObjectURL(finalblob);
+              console.log(bloburl);
+              audio.src = bloburl;
+              audio.play();
+
+              let list = props.audio.value;
+              const count = list[trackCount].count;
+              console.log(count);
+              db.collection("audio").doc({count: count}).delete().then(() =>{
+                db.collection("audio").add({count: count, blob: finalblob});
+              });
+              list[trackCount] = {
+                count: count,
+                rec: audio.cloneNode(),
+                dur: joinedDuration
+              };
+              props.setAudio({value: list});
+            });
             setDelClip({delete: []});
         }
       }
@@ -330,29 +370,29 @@ let AudioWave = (props) => {
         const arrayBuffer = fileReader.result;
         console.log(arrayBuffer);
         audioCont.decodeAudioData(arrayBuffer, (audioBuffer) => {
-          //let source1 = audioCont.createBufferSource();
+          let source1 = audioCont.createBufferSource();
           AudioBufferSlice(audioBuffer, trackStart*1000, startTime*1000,function(error, slicedAudioBuffer){
             if(error){
               console.error(error);
             }
             else{
-              //source1.buffer = slicedAudioBuffer;
+              source1.buffer = slicedAudioBuffer;
               console.log(slicedAudioBuffer);
               let temp = delClip.delete;
-              temp.push({data: slicedAudioBuffer, track: tc, order: o, duration: slicedAudioBuffer.duration});
+              temp.push({data: slicedAudioBuffer, track: tc, order: 0, duration: slicedAudioBuffer.duration});
               setDelClip({delete: temp});
             }
           });
-          //let source2 = audioCont.createBufferSource();
+          let source2 = audioCont.createBufferSource();
           AudioBufferSlice(audioBuffer, endTime*1000, duration*1000,function(error, slicedAudioBuffer){
             if(error){
               console.error(error);
             }
             else{
-              //source2.buffer = slicedAudioBuffer;
+              source2.buffer = slicedAudioBuffer;
               console.log(slicedAudioBuffer);
               let temp = delClip.delete;
-              temp.push({data: slicedAudioBuffer, track: tc, order: o, duration: slicedAudioBuffer.duration});
+              temp.push({data: slicedAudioBuffer, track: tc, order: 1, duration: slicedAudioBuffer.duration});
               setDelClip({delete: temp});
             }
           });
