@@ -22,7 +22,8 @@ let Export = () => {
             const a = document.createElement("a");
             let df = document.getElementById("download-file");
             
-            a.href = download.url;
+            a.href = "http://localhost:8000"+download.url;
+            console.log(a.href, download.url)
             a.download = download.name;
             df.appendChild(a);
             a.click();

@@ -6,6 +6,7 @@ from back.models import AudioStorage
 from .encoder import convert_audio
 import os
 import time
+import mimetypes
 from django.conf import settings
 from django.core.files import File
 
@@ -18,7 +19,7 @@ class ExportAudioAPI(APIView):
         print(session_id, file_format)
         #!!!!!concerns for sql injection:
         recordings = AudioStorage.objects.filter(session=session_id)
-        
+        print(recordings)
         dest_path = settings.MEDIA_ROOT + '\\temp\\' + session_id + "." + file_format
         convert_audio(recordings, file_format, dest_path)
         #very inefficient way to write files
@@ -30,11 +31,15 @@ class ExportAudioAPI(APIView):
             os.remove(obj.audio_file.path)
             obj.delete()
 
+        new_file = open(dest_path, "rb")
+
         new_rec = AudioStorage()
         new_rec.session = session_id
-        new_rec.audio_file.name = dest_path
+        #new_rec.audio_file.name = dest_path
+        new_rec.audio_file = File(new_file)
         new_rec.save()
         
         link = AudioStorage.objects.get(session=session_id).audio_file.url
+        print(link)
 
         return HttpResponse(link, content_type='text/plain')

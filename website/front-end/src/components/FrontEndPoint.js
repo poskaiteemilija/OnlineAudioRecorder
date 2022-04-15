@@ -7,11 +7,20 @@ import Localbase from "localbase";
 export const putData = async (filename, format, setDownload) => {
     let db = new Localbase('db');
     const data = await retrieveData(db);
-    console.log(data[0]);
+    console.log(data);
     const ses = localStorage.getItem("sessionID");
     let formData = new FormData();
     for(let i = 0; i<data.length; i++){
-        const file = new File([data[i].blob], ses+"_"+i+".webm", {type: "audio/webm"});
+        console.log(data[i]);
+        let file = new File([""], filename);
+        if(data[i].blob.type === "audio/x-wav"){
+            console.log(data[i].blob, "THIS IS WAV")
+            file = new File([data[i].blob], ses+"_"+data[i].count+".wav", {type: "audio/x-wav"});
+        }
+        else{
+            console.log(data[i].blob, "THIS IS WEBM")
+            file = new File([data[i].blob.blob], ses+"_"+data[i].count+".webm", {type: "audio/webm"});
+        }
         console.log(file);
         formData.append("audio_file", file);
         formData.append("session", localStorage.getItem("sessionID"));
