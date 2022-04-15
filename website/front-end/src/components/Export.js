@@ -19,7 +19,7 @@ let Export = () => {
         if(download.url !== "" && download.name !== ""){
             console.log(download);
             //this code has been taken in part and modified from https://github.com/michalstocki/FlashWavRecorder/issues/43
-            const a = document.createElement("a");
+            const a = document.getElementById("the-download-link");
             let df = document.getElementById("download-file");
             
             a.href = "http://localhost:8000"+download.url;
@@ -35,6 +35,7 @@ let Export = () => {
     return(
         <div id="download-file">
             <button className="function-button" onClick={ exportRec }><img src={require("../style/assets/export.svg").default} alt="Export" /></button>
+            <a id="the-download-link" href="" download></a>
             { popUpState ? <ExportPopUp setPopUpState={ setPopUpState } setDownload={ setDownload } /> : <></>}
         </div>
     );

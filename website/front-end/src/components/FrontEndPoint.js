@@ -56,10 +56,10 @@ export const getData = (filename, format, setDownload) => {
     })
     .then(resp =>{
         console.log(resp.data);
-        setDownload({
+        /*setDownload({
             url: resp.data,
             name: filename+"."+format
-        });
+        });*/
     })
     .catch(error => {})
 }
