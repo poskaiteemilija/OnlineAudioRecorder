@@ -35,6 +35,7 @@ let AudioWave = (props) => {
     const [currentTrack, setCurrentTrack] = useState({});
 
     const [delClip, setDelClip] = useState({delete: []});
+    const [copyClip, setCopyClip] = useState({copy: {}});
 
     useEffect(() => {
       let wave = document.getElementById("wave");
@@ -203,11 +204,13 @@ let AudioWave = (props) => {
         console.log(currentTrack);
         switch(option){
           case "copy":
-
+            onCopy();
             break;
           case "cut":
+            onCut();
             break;
           case "paste":
+
             break;
           case "delete":
             onRegionDelete();
@@ -275,6 +278,10 @@ let AudioWave = (props) => {
       }
     }, [delClip]);
 
+    useEffect(() => {
+      console.log(copyClip);
+      currentRegion.wavesurfer.clearRegions();
+    }, [copyClip])
 
 
     let sliceAudio = (startTime, endTime, blob, tc, o, func) => {
@@ -304,10 +311,10 @@ let AudioWave = (props) => {
                 setDelClip({delete: temp});
               }
               else if(func === "copy"){
-
-              }
-              else if(func === "cut"){
-
+                setCopyClip({copy: {
+                  data: slicedAudioBuffer,
+                  duration: slicedAudioBuffer.duration
+                }});
               }
               
             }
@@ -347,12 +354,22 @@ let AudioWave = (props) => {
       return {fb: blob, d: dur, st: startTime, et: endTime, t: tc};
     });
 
-    const onCopy = useCallback(() => {
+    const onCopy = useCallback(async () => {
+      const res = await getTrackInfo();
+      const blob = res.fb;
+      const dur = res.d;
+      const startTime = res.st;
+      const endTime = res.et;
+      const tc = res.t;
 
+      console.log(res, blob, dur, startTime, endTime, tc, "COPY *******************************************");
+
+      sliceAudio(startTime, endTime, blob, tc, 0, "copy");
     });
 
-    const onCut = useCallback(() => {
-
+    const onCut = useCallback(async () => {
+      await onCopy();
+      await onRegionDelete();
     });
 
     const onPaste = useCallback(() => {
@@ -369,7 +386,7 @@ let AudioWave = (props) => {
       const endTime = res.et;
       const tc = res.t;
 
-      console.log(res, blob, dur, startTime, endTime, tc, "UGBFRKWNOVRLUNHOILEWRNMOVIP#EHILTRNHBKEJUBGN JBNUJKBNUEITKU");
+      console.log(res, blob, dur, startTime, endTime, tc, "DELETE **************************************");
       
       if(startTime <= 0.1 && dur-endTime > 0.1){
         //const emptyBlob = new Blob([], {type: "audio/x-wav"});
