@@ -11,6 +11,7 @@ function App() {
     if(localStorage.getItem("sessionID") === null){
       db.collection('audio').delete();
       localStorage.setItem("sessionID", uuid() + Date.now());
+      localStorage.setItem("previousRec", "");
     }
     else{
       const answer = window.confirm("A previous session has been detected, would you like to continue?");
@@ -19,6 +20,7 @@ function App() {
       }
       db.collection('audio').delete();
       localStorage.setItem("sessionID", uuid() + Date.now());
+      localStorage.setItem("previousRec", "");
     }
     
   }, []);

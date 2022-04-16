@@ -11,6 +11,7 @@ router.register('api/upload', AudioStorageViewSet, 'upload')
 
 urlpatterns = [
     path('api/export', views.ExportAudioAPI.as_view(), name='export'),
+    path('api/delete/<pk>', AudioStorageViewSet.as_view({'delete':'destroy'})),
     path('', include(router.urls)),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

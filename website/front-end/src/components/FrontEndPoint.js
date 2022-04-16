@@ -10,6 +10,20 @@ export const putData = async (filename, format, setDownload) => {
     console.log(data);
     const ses = localStorage.getItem("sessionID");
     let formData = new FormData();
+    
+    const prevRec = localStorage.getItem("previousRec");
+    if(prevRec !== ""){
+        await axios({
+            method: "delete",
+            url: prevRec,
+            withCredentials: true,
+            xsrfHeaderName: 'X-CSRFToken',
+            xsrfCookieName: 'csrftoken',
+        }).then(r => {
+            console.log(r);
+        });
+    }
+    
     for(let i = 0; i<data.length; i++){
         console.log(data[i]);
         let file = new File([""], filename);
@@ -60,9 +74,10 @@ export const getData = (filename, format, setDownload) => {
             url: resp.data,
             name: filename+"."+format
         });*/
+        localStorage.setItem("previousRec", "http://localhost:8000/api/delete/"+resp.data.id);
         axios({
             method: 'get',
-            url: "http://localhost:8000"+resp.data,
+            url: "http://localhost:8000"+resp.data.link,
             responseType: 'blob'
         })
         .then( r => {
