@@ -40,23 +40,8 @@ class ExportAudioAPI(APIView):
         new_rec.audio_file = File(new_file)
         new_rec.save()
         
-        '''
+        
         link = AudioStorage.objects.get(session=session_id).audio_file.url
         print(link)
 
         return HttpResponse(link, content_type='text/plain')
-        '''
-
-        file_wrapper = FileWrapper(File(new_file))
-        file_mimetype = mimetypes.guess_type(dest_path)
-        print(0)
-        response = HttpResponse(file_wrapper, content_type=file_mimetype )
-        print(1)
-        response['X-Sendfile'] = dest_path
-        print(2)
-        response['Content-Length'] = os.stat(dest_path).st_size
-        print(3)
-        response['Content-Disposition'] = 'attachment; filename=%s' % "file_name"
-        print("done")
-
-        return response

@@ -16,14 +16,19 @@ let Export = () => {
     });
 
     useEffect(() => {
-        if(download.url !== "" && download.name !== ""){
-            console.log(download);
+        if(download.resp !== "" && download.name !== ""){
             //this code has been taken in part and modified from https://github.com/michalstocki/FlashWavRecorder/issues/43
             const a = document.getElementById("the-download-link");
             let df = document.getElementById("download-file");
-            
-            a.href = "http://localhost:8000"+download.url;
-            console.log(a.href, download.url)
+
+            console.log(download)
+            const b = new Blob([download.resp], {type: download.f});
+            const url = URL.createObjectURL(b);
+            //let lol = new Audio();
+            //lol.src = url;
+            //lol.play();
+            a.href = url;
+            //console.log(a.href, download.url)
             a.download = download.name;
             df.appendChild(a);
             a.click();

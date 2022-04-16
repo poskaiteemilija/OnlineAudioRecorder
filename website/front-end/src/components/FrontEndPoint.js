@@ -60,6 +60,19 @@ export const getData = (filename, format, setDownload) => {
             url: resp.data,
             name: filename+"."+format
         });*/
+        axios({
+            method: 'get',
+            url: "http://localhost:8000"+resp.data,
+            responseType: 'blob'
+        })
+        .then( r => {
+            console.log(r);
+            setDownload({
+                resp: r.data,
+                name: filename+"."+format,
+                contentType: "audio/"+format
+            });
+        })
     })
     .catch(error => {})
 }
