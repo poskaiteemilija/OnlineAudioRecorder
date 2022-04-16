@@ -6,7 +6,7 @@ import "../style/Wave.css";
 
 import CustomMenu from "./CustomMenu.js";
 import ConcatenateBlobs from "concatenateblobs";
-import AudioBufferSlice from "audiobuffer-slice";
+import AudioBufferSlice, { audioBufferSlice } from "audiobuffer-slice";
 import utils from "audio-buffer-utils";
 import audioEncoder from "audio-encoder";
 
@@ -36,6 +36,8 @@ let AudioWave = (props) => {
 
     const [delClip, setDelClip] = useState({delete: []});
     const [copyClip, setCopyClip] = useState({copy: {}});
+    const [currentTime, setCurrentTime] = useState(-1);
+    const [pasteClip, setPasteClip] = useState({paste: []});
 
     useEffect(() => {
       let wave = document.getElementById("wave");
@@ -60,6 +62,7 @@ let AudioWave = (props) => {
           const duration = recording.dur;
           
           const parentDiv = document.createElement("div");
+          parentDiv.id = "track"+count;
 
           let wavesurfertemp = WaveSurfer.create({
             container: parentDiv,
@@ -68,9 +71,7 @@ let AudioWave = (props) => {
             backgroundColor: "#ffffff",
             plugins:[
               RegionsPlugin.create({
-                regions:[
-                  
-                ]
+                regions:[]
               })
             ]
           });
@@ -81,7 +82,10 @@ let AudioWave = (props) => {
           wavesurfertemp.setCursorColor('#fa95d0');
           wavesurfertemp.setHeight("200");
 
-          wavesurfertemp.on("seek", () => {
+          wavesurfertemp.on("seek", (position) => {
+            const currentTime = position*wavesurfertemp.getDuration();
+            setCurrentTime(currentTime);
+            setCurrentTrack(wavesurfertemp);
             wavesurfertemp.clearRegions();
             setMenu(false);
             //setRegion(false);
@@ -96,7 +100,8 @@ let AudioWave = (props) => {
             }
           );
 
-          wavesurfertemp.on('region-created', () => {
+          wavesurfertemp.on('region-created', (region) => {
+            setCurrentRegion(region);
             setRegion(true);
           });
 
@@ -115,18 +120,14 @@ let AudioWave = (props) => {
             }
           });
 
-          wavesurfertemp.on("region-mouseenter", (region, mouseenter) => {
-            console.log("region event");
-            console.log(region);
-            console.log(mouseenter);
-            document.addEventListener("contextmenu", (event) => {
+          wavesurfertemp.on("ready", () =>{
+            console.log("nvreionwiotnbiwlnboinoirtnblirnbliblorgpodrjgposrjgojrgopij")
+            parentDiv.addEventListener("contextmenu", (event) => {
+              console.log("right click without region LOL")
               event.preventDefault();
               setAnchorPoint({x: event.pageY, y: event.pageX});
-              setCurrentRegion(region);
               setMenu(true);
-            });
-            //wavesurfertemp.clearRegions();
-            
+            })
           });
 
           if(duration !== maxVal){
@@ -204,16 +205,38 @@ let AudioWave = (props) => {
         console.log(currentTrack);
         switch(option){
           case "copy":
-            onCopy();
+            if(Object.keys(currentRegion).length !== 0){
+              onCopy();
+            }
+            else{
+              alert("Select a region to be copied!");
+            }
             break;
           case "cut":
-            onCut();
+            if(Object.keys(currentRegion).length !== 0){
+              onCut();
+            }
+            else{
+              alert("Select a region to be cut!");
+            }
             break;
           case "paste":
-
+            console.log(Object.keys(copyClip.copy).length, currentTime,Object.keys(currentTrack).length)
+            if(Object.keys(copyClip.copy).length !== 0 && currentTime !== -1 && Object.keys(currentTrack).length !== 0){
+              onPaste();
+            }
+            else{
+              alert("Clipboard is empty!");
+            }
             break;
           case "delete":
-            onRegionDelete();
+            if(Object.keys(currentRegion).length !== 0){
+              onRegionDelete();
+            }
+            else{
+              alert("Please select a region to delete!");
+            }
+            
             break;
         }
       }
@@ -252,36 +275,81 @@ let AudioWave = (props) => {
               joinedDuration = newbuf.duration*1000;
             }
 
-            audioEncoder(newbuf, 0, null, function onComplete(finalblob){
-              //const blob = new Blob([interleaved], {'type': "audio/webm;codecs=opus"});
-              let audio = new Audio();
-              const bloburl = URL.createObjectURL(finalblob);
-              console.log(bloburl);
-              audio.src = bloburl;
-              audio.play();
-
-              let list = props.audio.value;
-              const count = list[trackCount].count;
-              console.log(count);
-              db.collection("audio").doc({count: count}).delete().then(() =>{
-                db.collection("audio").add({count: count, blob: finalblob});
-              });
-              list[trackCount] = {
-                count: count,
-                rec: audio.cloneNode(),
-                dur: joinedDuration
-              };
-              props.setAudio({value: list});
-            });
+            updateTracks(newbuf, joinedDuration, trackCount);
+            
             setDelClip({delete: []});
+            setCurrentRegion({});
         }
       }
     }, [delClip]);
 
     useEffect(() => {
       console.log(copyClip);
-      currentRegion.wavesurfer.clearRegions();
-    }, [copyClip])
+      if(Object.keys(copyClip.copy).length !== 0 && Object.keys(copyClip.copy).length !== 0 && Object.keys(currentRegion).length !== 0){
+        currentRegion.wavesurfer.clearRegions();
+        setCurrentRegion({});
+      }
+    }, [copyClip]);
+
+    useEffect(() => {
+      if(pasteClip.paste !== []){
+        if(pasteClip.paste.length === 2){
+          console.log(pasteClip);
+          const first = pasteClip.paste[0].o === 0 ? 0 : 1;
+          const second = pasteClip.paste[1].o === 0 ? 0 : 1;
+
+          const buffer1 = pasteClip.paste[first].data;
+          const buffer2 = copyClip.copy.data;
+          const buffer3 = pasteClip.paste[second].data;
+          const trackCount = pasteClip.paste[0].tc;
+
+          let bufferArray = [];
+
+          if(buffer1 === null){
+            bufferArray = [buffer2, buffer3];
+          }
+          else if(buffer3 === null){
+            bufferArray = [buffer1, buffer2];
+          }
+          else{
+            bufferArray = [buffer1, buffer2, buffer3];
+          }
+          
+          const newBuf = utils.concat([buffer1, buffer2, buffer3]);
+          const joinedDuration = (pasteClip.paste[0].duration+pasteClip.paste[1].duration+copyClip.copy.duration)*1000;
+          console.log(pasteClip.paste[0].duration, pasteClip.paste[1].duration, copyClip.copy.duration)
+
+          console.log(newBuf, joinedDuration, trackCount);
+          updateTracks(newBuf, joinedDuration, trackCount);
+          
+          setPasteClip({paste: []});
+        }
+      }
+    }, [pasteClip])
+
+    const updateTracks = (newbuf, joinedDuration, trackCount) => {
+      audioEncoder(newbuf, 0, null, function onComplete(finalblob){
+        //const blob = new Blob([interleaved], {'type': "audio/webm;codecs=opus"});
+        let audio = new Audio();
+        const bloburl = URL.createObjectURL(finalblob);
+        console.log(bloburl);
+        audio.src = bloburl;
+        audio.play();
+
+        let list = props.audio.value;
+        const count = list[trackCount].count;
+        console.log(count);
+        db.collection("audio").doc({count: count}).delete().then(() =>{
+          db.collection("audio").add({count: count, blob: finalblob});
+        });
+        list[trackCount] = {
+          count: count,
+          rec: audio.cloneNode(),
+          dur: joinedDuration
+        };
+        props.setAudio({value: list});
+      });
+    }
 
 
     let sliceAudio = (startTime, endTime, blob, tc, o, func) => {
@@ -323,6 +391,25 @@ let AudioWave = (props) => {
       }
 
       fileReader.readAsArrayBuffer(blob);
+    }
+
+    let sliceAudioBuf = (audioBuffer, start, end, order, tc) => {
+      audioBufferSlice(audioBuffer, start*1000, end*1000, function(error, slicedAudioBuffer){
+        if(error){
+          console.error(error);
+        }
+        else{
+          let temp = pasteClip.paste;
+          temp.push({
+            data: slicedAudioBuffer,
+            duration: slicedAudioBuffer.duration,
+            tc: tc,
+            o: order
+        })
+          setPasteClip({paste: temp})
+        }
+      });
+
     }
 
     const getTrackInfo = useCallback(async () => {
@@ -373,7 +460,38 @@ let AudioWave = (props) => {
     });
 
     const onPaste = useCallback(() => {
-
+      console.log("paste")
+      const trackID = currentTrack.container.id;
+      console.log(currentTrack.container.id, currentTime)
+      const tc = parseInt(trackID.substring(5, trackID.length));
+      console.log(tc)
+      const buffer = currentTrack.backend.buffer;
+      if(currentTime === 0){
+        let temp = pasteClip.paste;
+        temp.push({
+          data: null,
+          duration:0,
+          tc: tc,
+          o: 0
+        });
+        setPasteClip({paste: temp});
+        sliceAudioBuf(buffer, currentTime, buffer.duration, 1, tc);
+      }
+      else if(currentTime === buffer.duration){
+        let temp = pasteClip.paste;
+        temp.push({
+          data: null,
+          duration:0,
+          tc: tc,
+          o: 1
+        });
+        setPasteClip({paste: temp});
+        sliceAudioBuf(buffer, 0, currentTime, 0, tc);
+      }
+      else{
+        sliceAudioBuf(buffer, 0, currentTime, 0, tc);
+        sliceAudioBuf(buffer, currentTime, buffer.duration, 1, tc);
+      }
     });
 
     const onRegionDelete = useCallback(async () => {
