@@ -42,6 +42,45 @@ let AudioWave = (props) => {
     const [showSlider, setShowSlider] = useState(false);
     const [silent, setSilent] = useState({value: -1});
 
+    const quickTrackOptions = (id) => {
+      let mainDiv = document.createElement("div");
+      mainDiv.className = "quick-track-options";
+      mainDiv.id = "qto"+id;
+
+      let deleteBut = document.createElement("button");
+      deleteBut.id = "db"+id;
+      deleteBut.innerHTML = "Delete";
+      deleteBut.onclick = () => {onDelButton(deleteBut.id)}
+
+      let muteButton = document.createElement("button");
+      muteButton.id = "mb"+id;
+      muteButton.innerHTML = "Mute";
+      muteButton.onclick = () => {onMuteButton(muteButton.id)}
+
+      let changeVolBut = document.createElement("button");
+      changeVolBut.id = "cvb"+id;
+      changeVolBut.innerHTML = "Change Volume"
+      changeVolBut.onclick = () => {onChangeVolume(changeVolBut.id)}
+
+      mainDiv.appendChild(muteButton);
+      mainDiv.appendChild(changeVolBut);
+      mainDiv.appendChild(deleteBut);
+
+      return mainDiv;
+    }
+
+    const onDelButton = (id) => {
+      console.log(id, "DELETE***************************");
+    }
+
+    const onMuteButton = (id) => {
+      console.log(id, "MUTE**************************")
+    }
+
+    const onChangeVolume = (id) => {
+      console.log(id, "ON CHANGE VOLUME************************")
+    }
+
     useEffect(() => {
       let wave = document.getElementById("wave");
       wave.innerHTML = "";
@@ -139,6 +178,8 @@ let AudioWave = (props) => {
           }
           
           //baseDiv.append(parentDiv);
+          const qto = quickTrackOptions(count);
+          parentDiv.appendChild(qto);
           wave.appendChild(parentDiv);
 
           newList.push(wavesurfertemp);
