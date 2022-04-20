@@ -24,6 +24,7 @@ let Playback = () =>{
     const [updateList, setUpdateList] = useState(false);
 
     const [versionControl, setVersionControl] = useState({c: 0});
+    const [currentTime, setCurrentTime] = useState({time: 0});
 
     let db = new Localbase('db');
     
@@ -111,6 +112,27 @@ let Playback = () =>{
         }
     });
 
+    const handleUndo = useCallback( async () => {
+        const stack = await db.collection("versionControl").orderBy('time').get();
+        console.log(stack.length)
+        if(stack.length > 1){
+          const lastCol = stack[stack.length-2];
+          console.log();
+          setCurrentTime({time: lastCol.time});
+          db.collection("audio").set(lastCol.document).then(() => {
+              setUpdateList(true);
+          });
+        }
+        else{
+    
+        }
+      });
+    
+      const handleRedo = useCallback(() => {
+    
+      })
+      
+
     console.log(audioState);
 
     const convert = useCallback((milis) => {
@@ -124,6 +146,8 @@ let Playback = () =>{
 
     return(
         <div className="playback">
+                <button onClick={handleUndo}>Undo</button>
+                <button>Redo</button>
                 <div id="recording-control-panel">
                     <div id="button-panel">
                         <button id="rec" className="function-button" onClick={() => setRecord({record: true})}><img src={require("../style/assets/rec.svg").default} alt="Record" /></button>

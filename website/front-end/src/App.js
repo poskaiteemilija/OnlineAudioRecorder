@@ -1,13 +1,14 @@
 import './style/App.css';
 import Playback from './components/Playback';
 import {v4 as uuid} from "uuid";
-import { useEffect } from 'react';
+import { useCallback, useEffect, useImperativeHandle, useState } from 'react';
 import Localbase from 'localbase';
 
 function App() {
+  let db = new Localbase('db');
 
   useEffect(() => {
-    let db = new Localbase('db');
+    
     if(localStorage.getItem("sessionID") === null){
       db.collection('audio').delete();
       db.collection('versionControl').delete();
@@ -29,6 +30,7 @@ function App() {
     
   }, []);
   
+
   return (
     <div className="App">
       <Playback />
