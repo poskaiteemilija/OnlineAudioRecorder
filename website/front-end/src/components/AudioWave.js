@@ -28,10 +28,14 @@ let AudioWave = (props) => {
     const [state, setState] = useState();
     const waveformRef = useRef();
     const [wavesurfer, setWaveSurfer] = useState({value: []});
+    const waveArrayRef = useRef();
+    waveArrayRef.current = wavesurfer.value;
+    
     const [region, setRegion] = useState(false);
     const [anchorPoint, setAnchorPoint] = useState({x:0, y:0});
     const [showMenu, setMenu] = useState(false);
     const [option, setOption] = useState("");
+    
     const [currentRegion, setCurrentRegion] = useState({});
     const [currentTrack, setCurrentTrack] = useState({});
 
@@ -77,8 +81,35 @@ let AudioWave = (props) => {
     }
 
     const onMuteButton = (id) => {
-      console.log(id, "MUTE**************************")
+      console.log(id, "MUTE**************************");
+      const trackCount = parseInt(id.substring(2,id.length));
+      mute(trackCount)
+      
+      
     }
+
+    const mute = useCallback((trackCount) => {
+      console.log(waveArrayRef);
+      const track = waveArrayRef.current[trackCount];
+      console.log(trackCount, track, wavesurfer, track.getMute());
+      let b = document.getElementById("mb"+trackCount);
+      b.innerHTML = "";
+
+      if(track.getMute()){
+        track.setMute(false);
+        b.innerHTML = "Mute"
+      }
+      else{
+        console.log("false");
+        track.setMute(true);
+        b.innerHTML = "Unmute";
+      }
+      //let newList = wavesurfer.value;
+      //newList[trackCount] = track;
+      //setWaveSurfer({value: newList})
+        
+      
+    });
 
     const onChangeVolume = (id) => {
       console.log(id, "ON CHANGE VOLUME************************")
@@ -705,6 +736,8 @@ let AudioWave = (props) => {
         track.seekTo(1);
       });
     });
+
+    console.log("UPDATE: ", wavesurfer.value)
 
     return(
       <div>
