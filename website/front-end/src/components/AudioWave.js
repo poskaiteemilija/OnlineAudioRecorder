@@ -399,9 +399,17 @@ let AudioWave = (props) => {
       const d = await db.collection('audio').get();
       console.log(d[c].blob);
       const blob = d[c].blob;
-      db.collection("audio").doc({count: c+1}).delete().then(() =>{
-        db.collection("audio").add({count: c+1, blob: blob, volume: vol});
+      const count = d[c].count;
+      db.collection("audio").doc({count: count}).delete().then(() =>{
+        db.collection("audio").add({count: count, blob: blob, volume: vol})
+        .then(() =>{
+          let vc = props.versionControl.c+1;
+          console.log("UWERSF BEOISDU BDIPE VTEOV ECVGJKGBIAHGLERIFVBHG", vc);
+          props.setVersionControl({c: vc})
+        });
       });
+
+      
     }
 
     useEffect(() => {
@@ -414,6 +422,7 @@ let AudioWave = (props) => {
           const buffer1 = pasteClip.paste[first].data;
 
           let buffer2 = {};
+        
           if(pasteClip.mode === "silence"){
             buffer2 = copyClip.silence;
             console.log(buffer2);
@@ -421,6 +430,8 @@ let AudioWave = (props) => {
           else{
             buffer2 = copyClip.copy.data;
           }
+
+          let d = buffer2.duration;
           
           const buffer3 = pasteClip.paste[second].data;
           const trackCount = pasteClip.paste[0].tc;
@@ -438,8 +449,8 @@ let AudioWave = (props) => {
           }
           
           const newBuf = utils.concat(bufferArray);
-          const joinedDuration = (pasteClip.paste[0].duration+pasteClip.paste[1].duration+copyClip.copy.duration)*1000;
-          console.log(pasteClip.paste[0].duration, pasteClip.paste[1].duration, copyClip.copy.duration)
+          const joinedDuration = (pasteClip.paste[0].duration+pasteClip.paste[1].duration+d)*1000;
+          console.log(pasteClip.paste[0].duration, pasteClip.paste[1].duration, d)
 
           console.log(newBuf, joinedDuration, trackCount);
           updateTracks(newBuf, joinedDuration, trackCount);
@@ -464,7 +475,11 @@ let AudioWave = (props) => {
         const count = list[trackCount].count;
         console.log(count);
         db.collection("audio").doc({count: count}).delete().then(() =>{
-          db.collection("audio").add({count: count, blob: finalblob});
+          db.collection("audio").add({count: count, blob: finalblob, volume: 1}).then(() =>{
+            let vc = props.versionControl.c+1;
+            console.log("UWERSF BEOISDU BDIPE VTEOV ECVGJKGBIAHGLERIFVBHG", vc);
+            props.setVersionControl({c: vc})
+          });
         });
         list[trackCount] = {
           count: count,
@@ -710,6 +725,9 @@ let AudioWave = (props) => {
       console.log(count);
       db.collection('audio').doc({count: count}).delete().then(document => {
         console.log("DELETED TRACK: ", document);
+        let vc = props.versionControl.c+1;
+        console.log("UWERSF BEOISDU BDIPE VTEOV ECVGJKGBIAHGLERIFVBHG", vc);
+        props.setVersionControl({c: vc})
       });
 
       let newList = [];

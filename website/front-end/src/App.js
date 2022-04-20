@@ -10,17 +10,21 @@ function App() {
     let db = new Localbase('db');
     if(localStorage.getItem("sessionID") === null){
       db.collection('audio').delete();
+      db.collection('versionControl').delete();
       localStorage.setItem("sessionID", uuid() + Date.now());
       localStorage.setItem("previousRec", "");
     }
     else{
       const answer = window.confirm("A previous session has been detected, would you like to continue?");
-      if(answer){
-        return;
+      if(!answer){
+        db.collection('audio').delete();
+        db.collection('versionControl').delete();
+        localStorage.setItem("sessionID", uuid() + Date.now());
+        localStorage.setItem("previousRec", "");
       }
-      db.collection('audio').delete();
-      localStorage.setItem("sessionID", uuid() + Date.now());
-      localStorage.setItem("previousRec", "");
+      else{
+
+      }
     }
     
   }, []);

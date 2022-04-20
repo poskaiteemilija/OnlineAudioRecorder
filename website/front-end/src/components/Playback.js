@@ -23,6 +23,8 @@ let Playback = () =>{
     const [trackCount, setTrackCount] = useState({value: []});
     const [updateList, setUpdateList] = useState(false);
 
+    const [versionControl, setVersionControl] = useState({c: 0});
+
     let db = new Localbase('db');
     
     const onStop = useCallback((recordedBlob) => {
@@ -34,9 +36,30 @@ let Playback = () =>{
     });
 
     useEffect(() => {
+        if(versionControl.c > 0){
+            console.log("?")
+            db.collection('audio').get().then((doc) =>{
+                //db.collection('versionControl').get()
+                const time = Date.now();
+                db.collection('versionControl').add({time: time, document: doc});
+            });
+        }
+    }, [versionControl]);
+
+    useEffect(() => {
+        if(audioState.value.length > 0){
+            let newDurationList = [];
+            audioState.value.forEach(entry => {
+                newDurationList.push(entry.dur);
+            });
+            setDuration({value: newDurationList});
+        }
+    }, [audioState]);
+
+    useEffect(() => {
         if(updateList === true){
             db.collection('audio').get().then(doc => {
-                console.log(doc);
+                //db.collection('versionControl').add({version: versionControl, document: doc});
                 const recBlob = doc[audioState.value.length].blob;
                 let audio = new Audio();
                 audio.src = recBlob.blobURL;
@@ -65,6 +88,10 @@ let Playback = () =>{
                //    const newDur = [recDur];
                //    setDuration({value: newDur});
                //}
+
+                let vc = versionControl.c+1;
+                console.log("UWERSF BEOISDU BDIPE VTEOV ECVGJKGBIAHGLERIFVBHG", vc);
+                setVersionControl({c: vc});
                 setUpdateList(false);
             })
         }
@@ -88,6 +115,7 @@ let Playback = () =>{
 
     const convert = useCallback((milis) => {
         //this solution has been modified to my needs and takes from this source https://stackoverflow.com/questions/21294302/converting-milliseconds-to-minutes-and-seconds-with-javascript
+        milis = Math.round(milis)
         const minutes = Math.floor(milis/60000);
         const seconds = ((milis%60000)/1000).toFixed(0);
         const miliseconds = milis - Math.floor(milis/1000)*1000;
@@ -120,7 +148,7 @@ let Playback = () =>{
                 {/*<PlaybackContext.Provider value={duration}>*/}
                 <div id="recording-pane">
                     <TimeScale dur = {Math.max(...duration.value)} />
-                    <RecordingState data = { audioState } playback={playback} setAudio = {setAudio} setTrackCount = {setTrackCount} trackCount = {trackCount}/>
+                    <RecordingState data = { audioState } playback={playback} setAudio = {setAudio} setTrackCount = {setTrackCount} trackCount = {trackCount} versionControl = {versionControl} setVersionControl = {setVersionControl}/>
                 </div>
                 {/*</PlaybackContext.Provider>*/}                
         </div>
