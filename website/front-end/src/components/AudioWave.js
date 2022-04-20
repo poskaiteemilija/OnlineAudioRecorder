@@ -71,6 +71,9 @@ let AudioWave = (props) => {
 
     const onDelButton = (id) => {
       console.log(id, "DELETE***************************");
+      const trackCount = parseInt(id.substring(2,id.length));
+      console.log(trackCount);
+      onTrackDelete(trackCount);
     }
 
     const onMuteButton = (id) => {
