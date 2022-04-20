@@ -299,14 +299,16 @@ let AudioWave = (props) => {
           console.log(pasteClip);
           const first = pasteClip.paste[0].o === 0 ? 0 : 1;
           const second = pasteClip.paste[1].o === 0 ? 0 : 1;
+          
           const buffer1 = pasteClip.paste[first].data;
 
           let buffer2 = {};
           if(pasteClip.mode === "silence"){
-            buffer2 = copyClip.copy.data;
+            buffer2 = copyClip.silence;
+            console.log(buffer2);
           }
           else{
-            buffer2 = copyClip.silence;
+            buffer2 = copyClip.copy.data;
           }
           
           const buffer3 = pasteClip.paste[second].data;
@@ -332,6 +334,8 @@ let AudioWave = (props) => {
           updateTracks(newBuf, joinedDuration, trackCount);
           
           setPasteClip({paste: [], mode: "standard"});
+          const copyC = copyClip.copy;
+          setCopyClip({copy: copyC, silence: {}});
         }
       }
     }, [pasteClip])
@@ -448,7 +452,7 @@ let AudioWave = (props) => {
           o: 0
         });
         setPasteClip({paste: temp, mode: "silence"});
-        sliceAudioBuf(buffer, currentTime, buffer.duration, 1, tc, "silent");
+        sliceAudioBuf(buffer, currentTime, buffer.duration, 1, tc, "silence");
       }
       else if(currentTime === buffer.duration){
         let temp = pasteClip.paste;
@@ -459,11 +463,11 @@ let AudioWave = (props) => {
           o: 1
         });
         setPasteClip({paste: temp, mode: "silence"});
-        sliceAudioBuf(buffer, 0, currentTime, 0, tc, "silent");
+        sliceAudioBuf(buffer, 0, currentTime, 0, tc, "silence");
       }
       else{
-        sliceAudioBuf(buffer, 0, currentTime, 0, tc, "silent");
-        sliceAudioBuf(buffer, currentTime, buffer.duration, 1, tc, "silent");
+        sliceAudioBuf(buffer, 0, currentTime, 0, tc, "silence");
+        sliceAudioBuf(buffer, currentTime, buffer.duration, 1, tc, "silence");
       }
 
     }
