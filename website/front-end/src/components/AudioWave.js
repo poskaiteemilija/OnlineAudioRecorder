@@ -85,9 +85,7 @@ let AudioWave = (props) => {
     const onMuteButton = (id) => {
       console.log(id, "MUTE**************************");
       const trackCount = parseInt(id.substring(2,id.length));
-      mute(trackCount)
-      
-      
+      mute(trackCount);
     }
 
     const mute = useCallback((trackCount) => {
@@ -105,12 +103,7 @@ let AudioWave = (props) => {
         console.log("false");
         track.setMute(true);
         b.innerHTML = "Unmute";
-      }
-      //let newList = wavesurfer.value;
-      //newList[trackCount] = track;
-      //setWaveSurfer({value: newList})
-        
-      
+      }    
     });
 
     const onChangeVolume = (id) => {
@@ -396,8 +389,18 @@ let AudioWave = (props) => {
         const t = waveArrayRef.current[vol.track];
         console.log(t);
         t.setVolume(vol.value);
+        updateDBVolume(vol.track, vol.value);
       }
     }, [vol]);
+
+    const updateDBVolume = async (c, vol) => {
+      const d = await db.collection('audio').get();
+      console.log(d[c].blob);
+      const blob = d[c].blob;
+      db.collection("audio").doc({count: c+1}).delete().then(() =>{
+        db.collection("audio").add({count: c+1, blob: blob, volume: vol});
+      });
+    }
 
     useEffect(() => {
       if(pasteClip.paste !== []){
