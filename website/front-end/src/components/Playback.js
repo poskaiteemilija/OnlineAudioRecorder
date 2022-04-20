@@ -27,7 +27,7 @@ let Playback = () =>{
     
     const onStop = useCallback((recordedBlob) => {
         console.log(recordedBlob);
-        db.collection('audio').add({count: trackCount.value.length, blob: recordedBlob})
+        db.collection('audio').add({count: trackCount.value.length, blob: recordedBlob, volume: 1})
         .then(setUpdateList(true));
         
         

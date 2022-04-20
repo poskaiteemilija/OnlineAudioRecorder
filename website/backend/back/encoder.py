@@ -4,13 +4,28 @@ import subprocess
 
 def convert_audio(sources, selected_format, filename):
     print(sources, "***********************************************")
-    print(sources[0].audio_file.path)
+    print(sources[0].audio_file.path, sources[0].volume)
     main_audio = AudioSegment.from_file(sources[0].audio_file.path)
+    volume = sources[0].volume
+    if(volume == 100):
+        dur = main_audio.duration_seconds*1000
+        main_audio = AudioSegment.silent(duration=dur)
+    else:
+        main_audio = main_audio - sources[0].volume
+    
     print(main_audio, "this is main audio +++++++++++++++++++++++++++++++++")
     main_length = len(main_audio)
     if(len(sources) >= 2):
         for i in range(1, len(sources)):
             temp_audio = AudioSegment.from_file(sources[i].audio_file.path)
+            volume = sources[i].volume
+            if(volume == 100):
+                dur = temp_audio.duration_seconds*1000
+                temp_audio = AudioSegment.silent(duration=dur)
+            else:
+                temp_audio = temp_audio - sources[i].volume
+            
+
             if(main_length<len(temp_audio)):
                 main_audio = main_audio[:len(main_audio)] + AudioSegment.silent(len(temp_audio)-main_length)
                 main_length = len(main_audio)

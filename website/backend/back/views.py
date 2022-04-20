@@ -37,6 +37,7 @@ class ExportAudioAPI(APIView):
         new_rec = AudioStorage()
         new_rec.session = session_id
         new_rec.audio_file.name = dest_path
+        new_rec.volume = 1
         #new_rec.audio_file = File(new_file)
         new_rec.save()
         print(AudioStorage.objects.get(session=session_id))

@@ -38,7 +38,19 @@ export const putData = async (filename, format, setDownload) => {
         console.log(file);
         formData.append("audio_file", file);
         formData.append("session", localStorage.getItem("sessionID"));
-        formData.append("volume", data[i].volume);
+
+        let v = 1;
+        if(data[i].volume == 1){
+            v = 0;
+        }
+        else if(data[i].volume == 0){
+            v = 100
+        }
+        else{
+            v = 30-(30*data[i].volume);
+        }
+        
+        formData.append("volume", v);
         await axios({
             method: 'post',
             url: 'http://localhost:8000/api/upload/',        //change to this url when running in docker http://127.0.0.1/api/upload/

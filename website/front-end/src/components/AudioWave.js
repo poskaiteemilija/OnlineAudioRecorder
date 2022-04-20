@@ -98,11 +98,13 @@ let AudioWave = (props) => {
       if(track.getMute()){
         track.setMute(false);
         b.innerHTML = "Mute"
+        updateDBVolume(trackCount, 1);
       }
       else{
         console.log("false");
         track.setMute(true);
         b.innerHTML = "Unmute";
+        updateDBVolume(trackCount, 0);
       }    
     });
 
