@@ -9,6 +9,7 @@ import ConcatenateBlobs from "concatenateblobs";
 import AudioBufferSlice, { audioBufferSlice } from "audiobuffer-slice";
 import utils from "audio-buffer-utils";
 import audioEncoder from "audio-encoder";
+import OptionPopUp from './OptionPopUp';
 
 
 //import ControlDiv from "./ControlDiv";
@@ -38,6 +39,8 @@ let AudioWave = (props) => {
     const [copyClip, setCopyClip] = useState({copy: {}, silence: {}});
     const [currentTime, setCurrentTime] = useState(-1);
     const [pasteClip, setPasteClip] = useState({paste: [], mode: "standard"});
+    const [showSlider, setShowSlider] = useState(false);
+    const [silent, setSilent] = useState({value: -1});
 
     useEffect(() => {
       let wave = document.getElementById("wave");
@@ -238,7 +241,8 @@ let AudioWave = (props) => {
             }
             break;
           case "silence":
-            onSilence();
+            setShowSlider(true);
+            //onSilence();
             break;
         }
       }
@@ -292,6 +296,13 @@ let AudioWave = (props) => {
         setCurrentRegion({});
       }
     }, [copyClip]);
+
+    useEffect(() => {
+      if(silent.value !== -1){
+        onSilence();
+        setSilent({value: -1});
+      }
+    }, [silent]);
 
     useEffect(() => {
       if(pasteClip.paste !== []){
@@ -436,7 +447,7 @@ let AudioWave = (props) => {
       const buffer = currentTrack.backend.buffer;
 
       //get this variable from user
-      const userDefinedDur = 5;
+      const userDefinedDur = silent.value;
       const rate = 44100;
       const audioChanels = 2;
       const silentBuffer = utils.create(userDefinedDur*rate, audioChanels, rate);
@@ -655,6 +666,7 @@ let AudioWave = (props) => {
       <div>
         <CustomMenu showMenu = {showMenu} anchorPoint = {anchorPoint} setOption = {setOption}></CustomMenu>
         <div ref={waveformRef} id="wave"></div>
+        <OptionPopUp showSlider = {showSlider} setShowSlider = {setShowSlider} setSilent = {setSilent}></OptionPopUp>
       </div>
       
     );

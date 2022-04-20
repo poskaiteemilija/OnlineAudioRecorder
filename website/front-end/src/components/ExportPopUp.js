@@ -18,8 +18,8 @@ const ExportPopUp = ({ setPopUpState, setDownload }) => {
         setFormat(event.target.value);
     });
 
-    return(<div id="popup-background">
-        <div id="export-popup" onBlur={window.focus()}>
+    return(<div className="popup-background">
+        <div className="export-popup" onBlur={window.focus()}>
             <h2>EXPORT OPTIONS</h2>
             <form onSubmit={ handleSubmit } >
                 <label for="filename">File name</label>
