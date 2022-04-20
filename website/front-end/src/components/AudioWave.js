@@ -43,8 +43,10 @@ let AudioWave = (props) => {
     const [copyClip, setCopyClip] = useState({copy: {}, silence: {}});
     const [currentTime, setCurrentTime] = useState(-1);
     const [pasteClip, setPasteClip] = useState({paste: [], mode: "standard"});
-    const [showSlider, setShowSlider] = useState(false);
+
+    const [showSlider, setShowSlider] = useState({show: false, mode: "s"});
     const [silent, setSilent] = useState({value: -1});
+    const [vol, setVol] = useState({value: -1, track: -1});
 
     const quickTrackOptions = (id) => {
       let mainDiv = document.createElement("div");
@@ -113,7 +115,16 @@ let AudioWave = (props) => {
 
     const onChangeVolume = (id) => {
       console.log(id, "ON CHANGE VOLUME************************")
+      const trackCount = parseInt(id.substring(3,id.length));
+      changeVol(trackCount);
     }
+
+    const changeVol = useCallback((trackCount) =>{
+      console.log(waveArrayRef.current)
+      let track = waveArrayRef.current[trackCount];
+      console.log(track.getVolume(), track.backend.buffer);
+      setShowSlider({show: true, mode: "v", track: trackCount});
+    });
 
     useEffect(() => {
       let wave = document.getElementById("wave");
@@ -316,7 +327,7 @@ let AudioWave = (props) => {
             }
             break;
           case "silence":
-            setShowSlider(true);
+            setShowSlider({show: true, mode: "s"});
             //onSilence();
             break;
         }
@@ -378,6 +389,15 @@ let AudioWave = (props) => {
         setSilent({value: -1});
       }
     }, [silent]);
+
+    useEffect(() => {
+      if(vol.track !== -1 && vol.value !== -1){
+        console.log(vol);
+        const t = waveArrayRef.current[vol.track];
+        console.log(t);
+        t.setVolume(vol.value);
+      }
+    }, [vol]);
 
     useEffect(() => {
       if(pasteClip.paste !== []){
@@ -743,7 +763,7 @@ let AudioWave = (props) => {
       <div>
         <CustomMenu showMenu = {showMenu} anchorPoint = {anchorPoint} setOption = {setOption}></CustomMenu>
         <div ref={waveformRef} id="wave"></div>
-        <OptionPopUp showSlider = {showSlider} setShowSlider = {setShowSlider} setSilent = {setSilent}></OptionPopUp>
+        <OptionPopUp showSlider = {showSlider} setShowSlider = {setShowSlider} setSilent = {setSilent} setVol = {setVol}></OptionPopUp>
       </div>
       
     );
