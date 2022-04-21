@@ -9,6 +9,7 @@ import Export from "./Export";
 import FrontEndPoint from './FrontEndPoint';
 import "../style/Playback.css";
 import TimeScale from "./TimeScale";
+import Import from './Import';
 
 export async function retrieveData(db){
     let ar = await db.collection('audio').get();
@@ -280,6 +281,7 @@ let Playback = () =>{
                             backgroundColor="#484848"
                         />
                         <Export />
+                        <Import setTrackCount = {setTrackCount} trackCount = {trackCount} setUpdateList = {setUpdateList} setVersionControl={setVersionControl}/>
                     </div>
                 </div>
                 {/*<PlaybackContext.Provider value={duration}>*/}

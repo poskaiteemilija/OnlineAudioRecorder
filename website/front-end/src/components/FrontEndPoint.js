@@ -33,7 +33,7 @@ export const putData = async (filename, format, setDownload) => {
         }
         else{
             console.log(data[i].blob, "THIS IS WEBM")
-            file = new File([data[i].blob.blob], ses+"_"+data[i].count+".webm", {type: "audio/webm"});
+            file = new File([data[i].blob], ses+"_"+data[i].count+".webm", {type: "audio/webm"});
         }
         console.log(file);
         formData.append("audio_file", file);
@@ -51,6 +51,7 @@ export const putData = async (filename, format, setDownload) => {
         }
         
         formData.append("volume", v);
+        
         await axios({
             method: 'post',
             url: 'http://localhost:8000/api/upload/',        //change to this url when running in docker http://127.0.0.1/api/upload/

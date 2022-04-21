@@ -396,11 +396,11 @@ let AudioWave = (props) => {
     }, [vol]);
 
     const updateDBVolume = async (c, vol) => {
-      const d = await db.collection('audio').get();
-      console.log(d[c].blob);
-      const blob = d[c].blob;
-      const count = d[c].count;
-      const dur = d[c].duration;
+      const d = await db.collection('audio').get({count: c+1});
+      console.log(d);
+      const blob = d.blob;
+      const count = d.count;
+      const dur = d.duration;
       db.collection("audio").doc({count: count}).delete().then(() =>{
         db.collection("audio").add({count: count, blob: blob, volume: vol, duration: dur})
         .then(() =>{
@@ -469,7 +469,7 @@ let AudioWave = (props) => {
         const bloburl = URL.createObjectURL(finalblob);
         console.log(bloburl);
         audio.src = bloburl;
-        audio.play();
+        /*audio.play();*/
 
         let list = props.audio.value;
         const count = list[trackCount].count;
