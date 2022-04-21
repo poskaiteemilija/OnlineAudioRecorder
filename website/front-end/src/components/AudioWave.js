@@ -400,12 +400,11 @@ let AudioWave = (props) => {
       console.log(d[c].blob);
       const blob = d[c].blob;
       const count = d[c].count;
+      const dur = d[c].duration;
       db.collection("audio").doc({count: count}).delete().then(() =>{
-        db.collection("audio").add({count: count, blob: blob, volume: vol})
+        db.collection("audio").add({count: count, blob: blob, volume: vol, duration: dur})
         .then(() =>{
-          let vc = props.versionControl.c+1;
-          console.log("UWERSF BEOISDU BDIPE VTEOV ECVGJKGBIAHGLERIFVBHG", vc);
-          props.setVersionControl({c: vc})
+          props.setVersionControl(true)
         });
       });
 
@@ -463,6 +462,7 @@ let AudioWave = (props) => {
     }, [pasteClip])
 
     const updateTracks = (newbuf, joinedDuration, trackCount) => {
+      const dur = newbuf.duration
       audioEncoder(newbuf, 0, null, function onComplete(finalblob){
         //const blob = new Blob([interleaved], {'type': "audio/webm;codecs=opus"});
         let audio = new Audio();
@@ -475,10 +475,8 @@ let AudioWave = (props) => {
         const count = list[trackCount].count;
         console.log(count);
         db.collection("audio").doc({count: count}).delete().then(() =>{
-          db.collection("audio").add({count: count, blob: finalblob, volume: 1}).then(() =>{
-            let vc = props.versionControl.c+1;
-            console.log("UWERSF BEOISDU BDIPE VTEOV ECVGJKGBIAHGLERIFVBHG", vc);
-            props.setVersionControl({c: vc})
+          db.collection("audio").add({count: count, blob: finalblob, volume: 1, duration: dur*1000}).then(() =>{
+            props.setVersionControl(true)
           });
         });
         list[trackCount] = {
@@ -725,9 +723,7 @@ let AudioWave = (props) => {
       console.log(count);
       db.collection('audio').doc({count: count}).delete().then(document => {
         console.log("DELETED TRACK: ", document);
-        let vc = props.versionControl.c+1;
-        console.log("UWERSF BEOISDU BDIPE VTEOV ECVGJKGBIAHGLERIFVBHG", vc);
-        props.setVersionControl({c: vc})
+        props.setVersionControl(true)
       });
 
       let newList = [];
