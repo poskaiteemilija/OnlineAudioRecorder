@@ -98,7 +98,8 @@ export const getData = (filename, format, setDownload) => {
             console.log(r);
             setDownload({
                 resp: r.data,
-                name: filename+"."+format,
+                name: filename,
+                format: format,
                 contentType: "audio/"+format
             });
         })

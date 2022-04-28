@@ -1,0 +1,22 @@
+.quick-track-options{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.quick-track-options button{
+    width: auto;
+    height: 2em;
+    margin: 3px;
+    background-color: #484848;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.7em;
+    font-family: sans-serif;
+}
+
+.wavesurfer-region{
+    z-index: 1;
+}

@@ -10,6 +10,7 @@ import FrontEndPoint from './FrontEndPoint';
 import "../style/Playback.css";
 import TimeScale from "./TimeScale";
 import Import from './Import';
+import {v4 as uuid} from "uuid";
 
 export async function retrieveData(db){
     let ar = await db.collection('audio').get();
@@ -28,6 +29,28 @@ let Playback = () =>{
     const [currentTime, setCurrentTime] = useState({time: 0});
 
     let db = new Localbase('db');
+
+    useEffect(() => {
+        if(localStorage.getItem("sessionID") === null){
+          db.collection('audio').delete();
+          db.collection('versionControl').delete();
+          localStorage.setItem("sessionID", uuid() + Date.now());
+          localStorage.setItem("previousRec", "");
+        }
+        else{
+          const answer = window.confirm("A previous session has been detected, would you like to continue?");
+          if(!answer){
+            db.collection('audio').delete();
+            db.collection('versionControl').delete();
+            localStorage.setItem("sessionID", uuid() + Date.now());
+            localStorage.setItem("previousRec", "");
+          }
+          else{
+            setUpdateList(true);
+          }
+        }
+        
+      }, []);
     
     const onStop = useCallback((recordedBlob) => {
         console.log(recordedBlob);
@@ -69,9 +92,12 @@ let Playback = () =>{
                         else{
                             db.collection("versionControl").add({time: time, document: doc});
                         }
+                        if(vcList.length >= 1){
+                            let button = document.getElementById("undo-button");
+                            button.disabled = false;
+                            button.className = "vc-buttons";
+                        }
                         setCurrentTime({time: time});
-                        let button = document.getElementById("undo-button");
-                        button.disabled = false;
                     });
 
                 });
@@ -148,6 +174,8 @@ let Playback = () =>{
 
     const stopBut = useCallback(() => {
         if(recState.record === true){
+            let m = document.getElementsByClassName("sound-wave-active");
+            m[0].className = "sound-wave";
             let l = trackCount.value;
             l.push(0);
             setTrackCount({value: l});
@@ -185,19 +213,23 @@ let Playback = () =>{
             if(listPointer === 0){
                 let button = document.getElementById("undo-button");
                 button.disabled = true;
+                button.className = "vc-disabled";
                 let redobutton = document.getElementById("redo-button");
                 redobutton.disabled = false;
+                redobutton.className = "vc-buttons";
             }
             else{
                 if(listPointer-1 === 0){
                     let button = document.getElementById("undo-button");
                     button.disabled = true;
+                    button.className = "vc-disabled";
                 }
                 setCurrentTime({time: stack[listPointer-1].time});
                 db.collection("audio").set(stack[listPointer-1].document).then(() => {
                     setUpdateList(true);
                     let redobutton = document.getElementById("redo-button");
                     redobutton.disabled = false;
+                    redobutton.className = "vc-buttons";
                 });   
             }
         }
@@ -220,18 +252,24 @@ let Playback = () =>{
                     break;
                 }
             }
-            console.log(listPointer);
+            console.log(listPointer, stack.length);
             
             if(listPointer === stack.length-1){
+                console.log("??gnieroib35h");
                 let button = document.getElementById("redo-button");
                 button.disabled = true;
+                button.className = "vc-disabled";
                 let undobutton = document.getElementById("undo-button");
                 undobutton.disabled = false;
+                undobutton.className = "vc-buttons";
             }
             else{
-                if(listPointer+1 === stack.length-1){
+                if(listPointer === stack.length-2){
+                    console.log("??????wirhbnivnrebopi")
                     let button = document.getElementById("redo-button");
                     button.disabled = true;
+                    button.className = "vc-disabled";
+                    
                 }
                 setCurrentTime({time: stack[listPointer+1].time});
                 db.collection("audio").set(stack[listPointer+1].document).then(() => {
@@ -239,6 +277,7 @@ let Playback = () =>{
                 });
                 let undobutton = document.getElementById("undo-button");
                 undobutton.disabled = false;
+                undobutton.className = "vc-buttons";
             }
         }
         else{
@@ -258,23 +297,105 @@ let Playback = () =>{
         return (minutes < 10 ? '0' : '') + minutes + ":" + (seconds < 10 ? '0' : '') + seconds + '\'' + (miliseconds < 100 ? '0' : '') + (miliseconds < 10 ? '0' : '') + miliseconds;
     });
 
+    const onRecord = useCallback(() => {
+        if(recState.record === false){
+            setRecord({record: true});
+            let m = document.getElementsByClassName("sound-wave");
+            console.log(m);
+            m[0].className = "sound-wave-active";
+        }
+        if(recState.record === true){
+            let m = document.getElementsByClassName("sound-wave-active");
+            m[0].className = "sound-wave";
+            let l = trackCount.value;
+            l.push(0);
+            setTrackCount({value: l});
+            setRecord({record: false});
+        }
+        
+    });
+
+    const onPause = useCallback(() => {
+        if(recState.record === false){
+            setPlayback("pause")
+        }
+        else{
+            let m = document.getElementsByClassName("sound-wave-active");
+            m[0].className = "sound-wave";
+            let l = trackCount.value;
+            l.push(0);
+            setTrackCount({value: l});
+            setRecord({record: false});
+        }
+    });
+
+    const onPlay = useCallback(() => {
+        if(recState.record === false){
+            setPlayback("play")
+        }
+        else{
+            let m = document.getElementsByClassName("sound-wave-active");
+            m[0].className = "sound-wave";
+            let l = trackCount.value;
+            l.push(0);
+            setTrackCount({value: l});
+            setRecord({record: false});
+        }
+    });
+
+    const onSkipToFront = useCallback(() => {
+        if(recState.record === false){
+            setPlayback("skipToFront")
+        }
+        else{
+            let m = document.getElementsByClassName("sound-wave-active");
+            m[0].className = "sound-wave";
+            let l = trackCount.value;
+            l.push(0);
+            setTrackCount({value: l});
+            setRecord({record: false});
+        }
+    });
+
+    const onSkipToBack = useCallback(() => {
+        if(recState.record === false){
+            setPlayback("skipToBack")
+        }
+        else{
+            let m = document.getElementsByClassName("sound-wave-active");
+            m[0].className = "sound-wave";
+            let l = trackCount.value;
+            l.push(0);
+            setTrackCount({value: l});
+            setRecord({record: false});
+        }
+    });
+
     return(
         <div className="playback">
-                <button onClick={handleUndo} id="undo-button">Undo</button>
-                <button onClick={handleRedo} id="redo-button">Redo</button>
                 <div id="recording-control-panel">
                     <div id="button-panel">
-                        <button id="rec" className="function-button" onClick={() => setRecord({record: true})}><img src={require("../style/assets/rec.svg").default} alt="Record" /></button>
-                        <button id="stop" className="function-button" onClick={() => stopBut()}><img src={require("../style/assets/stop.svg").default} alt="Stop" /></button>
-                        <button id="play" className="function-button" onClick={ () => setPlayback("play") }><img src={require("../style/assets/play.svg").default} alt="Play" /></button>
-                        <button id="pause" className="function-button" onClick={ () => setPlayback("pause") }><img src={require("../style/assets/pause.svg").default} alt="Pause" /></button>
-                        <button id="stf" className="function-button" onClick={ () => setPlayback("skipToFront") }><img src={require("../style/assets/stf.svg").default} alt="Skip to Front" /></button>
-                        <button id="stb" className="function-button" onClick={ () => setPlayback("skipToBack") }><img src={require("../style/assets/stb.svg").default} alt="Skip to Back" /></button>
+                        <button id="rec" title="Record" className="function-button" onClick={ onRecord }><img src={require("../style/assets/rec.svg").default} alt="Record" /></button>
+                        <button id="stop" title="Stop" className="function-button" onClick={stopBut}><img src={require("../style/assets/stop.svg").default} alt="Stop" /></button>
+                        <button id="play" title="Play" className="function-button" onClick={ onPlay }><img src={require("../style/assets/play.svg").default} alt="Play" /></button>
+                        <button id="pause" title="Pause" className="function-button" onClick={ onPause }><img src={require("../style/assets/pause.svg").default} alt="Pause" /></button>
+                        <button id="stf" title="Skip To Front" className="function-button" onClick={ onSkipToFront }><img src={require("../style/assets/stf.svg").default} alt="Skip to Front" /></button>
+                        <button id="stb" title="Skip To Back" className="function-button" onClick={ onSkipToBack }><img src={require("../style/assets/stb.svg").default} alt="Skip to Back" /></button>
+                        <div>
+                            <p id="time-stamp-label">Project duration:</p>
+                            <p id="time-stamp">{convert(Math.max(...duration.value))}</p>
+                        </div>
+                        
                     </div>
-                    <p id="time-stamp">{convert(Math.max(...duration.value))}</p>
+                    
                     <div id="sound-export">
+                        <div id="version-control-panel">
+                            <button onClick={handleUndo} id="undo-button" className="vc-disabled" title="Undo" ><img src={require("../style/assets/undo.png").default} alt="Undo" style={{width: "85%", height: "auto"}}></img></button>
+                            <button onClick={handleRedo} id="redo-button" className="vc-disabled" title="Redo" ><img src={require("../style/assets/redo.png").default} alt="Redo" style={{width: "85%", height: "auto"}}></img></button>
+                        </div>
                         <ReactMic
                             record={ recState.record }
+                            id="monitor"
                             className="sound-wave"
                             onStop={ onStop }
                             strokeColor="white"

@@ -49,22 +49,26 @@ let AudioWave = (props) => {
     const [vol, setVol] = useState({value: -1, track: -1});
 
     const quickTrackOptions = (id) => {
+
       let mainDiv = document.createElement("div");
       mainDiv.className = "quick-track-options";
       mainDiv.id = "qto"+id;
 
       let deleteBut = document.createElement("button");
       deleteBut.id = "db"+id;
+      deleteBut.className = "dbs";
       deleteBut.innerHTML = "Delete";
       deleteBut.onclick = () => {onDelButton(deleteBut.id)}
 
       let muteButton = document.createElement("button");
       muteButton.id = "mb"+id;
+      muteButton.className = "mbs";
       muteButton.innerHTML = "Mute";
       muteButton.onclick = () => {onMuteButton(muteButton.id)}
 
       let changeVolBut = document.createElement("button");
       changeVolBut.id = "cvb"+id;
+      changeVolBut.className = "cvbs";
       changeVolBut.innerHTML = "Change Volume"
       changeVolBut.onclick = () => {onChangeVolume(changeVolBut.id)}
 
@@ -184,10 +188,12 @@ let AudioWave = (props) => {
 
           wavesurfertemp.on('region-created', (region) => {
             setCurrentRegion(region);
+            setCurrentTrack(region.wavesurfer)
             setRegion(true);
           });
 
           wavesurfertemp.on('region-removed', () =>{
+            setCurrentRegion({});
             setRegion(false);
           });
 
@@ -287,6 +293,7 @@ let AudioWave = (props) => {
         console.log("in useEffect");
         console.log(currentRegion);
         console.log(currentTrack);
+        if(Object.keys(currentTrack).length !== 0){
         switch(option){
           case "copy":
             if(Object.keys(currentRegion).length !== 0){
@@ -321,12 +328,24 @@ let AudioWave = (props) => {
               alert("Please select a region to delete!");
             }
             break;
-          case "silence":
+          case "isilence":
+            console.log("isilence");
             setShowSlider({show: true, mode: "s"});
             //onSilence();
             break;
+          case "rsilence":
+            console.log("rsilence");
+            if(Object.keys(currentRegion).length !== 0){
+              onRegionSilence();
+            }
+            else{
+              alert("Please select a region to silence!");
+            }
+            break;
+            //onRegionSilence();
         }
       }
+    }
 
       setOption("");
       setMenu(false);
@@ -488,7 +507,6 @@ let AudioWave = (props) => {
       });
     }
 
-
     let sliceAudio = (startTime, endTime, blob, tc, o, func) => {
       //check out this alternative way to copy a part of audiobuffer: https://www.npmjs.com/package/audiobuffer-slice
       //the code in this function is taken and combined from these two sources: https://stackoverflow.com/questions/54303632/trim-an-audio-file-using-javascript-first-3-seconds and https://stackoverflow.com/questions/40363335/how-to-create-an-audiobuffer-from-a-blob
@@ -550,6 +568,30 @@ let AudioWave = (props) => {
       });
 
     }
+
+    let onRegionSilence = useCallback(() => {
+       console.log("silence");
+       const trackID = currentTrack.container.id;
+       //console.log(currentTrack.container.id, currentTime)
+       const tc = parseInt(trackID.substring(5, trackID.length));
+       //console.log(tc)
+       const buffer = currentTrack.backend.buffer;
+
+       const regionStart = currentRegion.start;
+       const regionEnd = currentRegion.end;
+       console.log(regionStart, regionEnd);
+
+       //get this variable from user
+      const userDefinedDur = regionEnd-regionStart;
+      const rate = 44100;
+      const audioChanels = 2;
+      const silentBuffer = utils.create(userDefinedDur*rate, audioChanels, rate);
+      const copyC = copyClip.copy;
+      setCopyClip({copy: copyC, silence: silentBuffer});
+      
+      sliceAudioBuf(buffer, 0, regionStart, 0, tc, "silence");
+      sliceAudioBuf(buffer, regionEnd, buffer.duration, 1, tc, "silence");
+    });
 
     const onSilence = () => {
       console.log("silence");

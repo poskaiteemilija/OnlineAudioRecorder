@@ -3,11 +3,22 @@
     position: absolute;
     background-color: white;
     list-style: none;
-    padding: 0em;
+    padding: 0.5em;
+    border-radius: 3px;
+    box-shadow: 3px 1px 8px rgba(0, 0, 0, 0.13);
 }
 
-#contextMenu li{
-    border-bottom: solid black 0.25px;
-    padding: 0.1em 0.5em;
-    font-size: 1.25em;
+.cmi{
+    border-bottom: solid rgba(0, 0, 0, 0.13) 0.25px;
+    padding: 0.5em 0.5em;
+    font-size: 1em;
+    font-family: sans-serif;
+    cursor: pointer;
+}
+
+.last-item{
+    padding: 0.5em 0.5em;
+    font-size: 1em;
+    font-family: sans-serif;
+    cursor: pointer;
 }

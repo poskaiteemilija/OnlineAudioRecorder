@@ -4,6 +4,7 @@
     justify-content: space-between;
     align-items: center;
     height: inherit;
+    flex-wrap: wrap;
 }
 
 
@@ -22,6 +23,7 @@
     color: white;
     border: none;
     border-radius: 8px;
+    cursor: pointer;
 }
 
 .function-button img{
@@ -32,6 +34,16 @@
 .sound-wave{
     border-radius: 8px;
     margin-right: 3px;
+    width: 200px;
+    height: 4em;
+}
+
+.sound-wave-active{
+    box-shadow: 0px 0px 20px -2px rgb(196, 0, 0);
+    border-radius: 8px;
+    margin-right: 3px;
+    width: 200px;
+    height: 4em;
 }
 
 #sound-export{
@@ -46,11 +58,62 @@
     border: #484848 2px solid;
     background-color: #484848;
     margin:1em;
-    height: 50em;
+    height: auto;
+    min-height: 55em;
 }
 
 #time-stamp{
     color: white;
     font-size: 2em;
+    font-family: sans-serif;
+    padding: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-left: 1em;
 }
 
+#time-stamp-label{
+    color: #858585;
+    font-size: 1em;
+    margin: 0;
+    padding-left: 2em;
+    padding-top: 0.5em;
+    font-family: sans-serif;
+}
+
+#version-control-panel{
+    margin-right: 1em;
+    margin-top: 0.25m;
+    display: flex;
+    flex-direction: row;
+    
+}
+
+.vc-buttons{
+    width: 4em;
+    height: 3em;
+    background-color: #484848;
+    border: none;
+    border-radius: 8px;
+    margin: 3px;
+    cursor: pointer;
+}
+
+.vc-disabled{
+    width: 4em;
+    height: 3em;
+    background-color: #484848;
+    border: none;
+    border-radius: 8px;
+    margin: 3px;
+    filter: brightness(50%);
+}
+
+.vc-disabled img{
+    filter: brightness(50%);
+}
+
+#import-but{
+    display: none;
+    
+}

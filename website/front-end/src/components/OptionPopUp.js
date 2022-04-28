@@ -50,18 +50,24 @@ const OptionPopUp = (props) => {
     if(props.showSlider.show === true && props.showSlider.mode === "s"){
         return(<div className="popup-background">
             <div className="export-popup">
+                <div id="exit-container">
+                    <button className="button" onClick={() => props.setShowSlider({show: false, mode: "s"})}>X</button>
+                </div>
                 <p>Please select the duration of the silence in seconds (up to 30s):</p>
                 <input type="number" min="0.1" max="30" step="0.1" className="slider" id="silentRange"></input>
-                <button onClick={handleClickSilence}>Select</button>
+                <button className="button" style={{float: "right"}} onClick={handleClickSilence}>Select</button>
             </div>
         </div>);
     }
     else if(props.showSlider.show === true && props.showSlider.mode === "v"){
         return(<div className="popup-background">
             <div className="export-popup">
+                <div id="exit-container">
+                    <button className="button" onClick={() => props.setShowSlider({show: false, mode: "v"})}>X</button>
+                </div>
                 <p>Please select volume with 0 being muted and 1 full volume:</p>
                 <input type="number" min="0" max="1" step="0.01" className="slider" id="silentRange"></input>
-                <button onClick={handleClickVol}>Select</button>
+                <button  className="button" style={{float: "right"}} onClick={handleClickVol}>Select</button>
             </div>
         </div>);
     }

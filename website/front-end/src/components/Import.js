@@ -1,6 +1,7 @@
 import react, { useCallback, useState } from 'react';
 import audioEncoder from 'audio-encoder';
 import Localbase from 'localbase';
+import "../style/Playback.css";
 
 const Import = (props) => {
     const db = new Localbase("db");
@@ -51,9 +52,10 @@ const Import = (props) => {
 
     });
 
-    return(<div id="sound-import">
-        <input type="file" id="import-but" onChange={handleEvent} accept='.mp3, .wav, .webm'></input>
-    </div>)
+    return(<button id="sound-import" className="function-button" onClick={() => {document.getElementById("import-but").click()}} title="Import">
+        <img src={require("../style/assets/upload.png").default} alt="Import" ></img>
+        <input type="file" id="import-but" name="import-but" onChange={handleEvent} accept='.mp3, .wav, .webm'></input>
+    </button>)
 }
 
 export default Import;
