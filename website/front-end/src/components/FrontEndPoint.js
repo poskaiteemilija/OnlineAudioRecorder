@@ -54,7 +54,7 @@ export const putData = async (filename, format, setDownload) => {
         
         await axios({
             method: 'post',
-            url: 'http://localhost:8000/api/upload/',        //change to this url when running in docker http://127.0.0.1/api/upload/
+            url: 'http://127.0.0.1/api/upload/',        //change to this url when running in docker http://127.0.0.1/api/upload/; when running on local dev server: http://localhost:8000/api/upload/;
             data: formData,
             headers: { "Content-Type": "multipart/form-data" }
         })
@@ -79,7 +79,7 @@ export const getData = (filename, format, setDownload) => {
     form.append('format', format);
     axios({
         method: 'post',
-        url: 'http://localhost:8000/api/export',     //change to this url when running in docker http://127.0.0.1/api/export
+        url: 'http://127.0.0.1/api/export',     //change to this url when running in docker http://127.0.0.1/api/export; when running on local dev server: http://localhost:8000/api/export;
         data: form,
     })
     .then(resp =>{
@@ -88,10 +88,11 @@ export const getData = (filename, format, setDownload) => {
             url: resp.data,
             name: filename+"."+format
         });*/
-        localStorage.setItem("previousRec", "http://localhost:8000/api/delete/"+resp.data.id);
+        localStorage.setItem("previousRec", "http://127.0.0.1/api/delete/"+resp.data.id);          //change to this url when running in docker http://127.0.0.1/api/delete/; when running on local dev server: http://localhost:8000/api/delete/;
+
         axios({
             method: 'get',
-            url: "http://localhost:8000"+resp.data.link,
+            url: "http://127.0.0.1"+resp.data.link,        //change to this url when running in docker "http://127.0.0.1"+resp.data.link; when running on local dev server: "http://localhost:8000"+resp.data.link;
             responseType: 'blob'
         })
         .then( r => {
