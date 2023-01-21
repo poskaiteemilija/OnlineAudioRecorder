@@ -1,11 +1,23 @@
-# My main concerns:
+# Continuation of work (2023)
+
+Main issues with project that need addressing:
+-   Refactoring
+    -   Moving VanillaJS code to React
+    -   Optimization & code clean up
+-   Documentation
+-   Full Docker integration
+-   Website hosting
+-   Fixing known bugs (TO DO: bug list)
+-   Test code
+
+# My main concerns (2021-2022)
 
 -	*Accessibility & Portability* – ease of use of the website and minimal latency for each user
 -	*Well-developed service* – do less things but do them well
 -	*No account approach* – have standalone software with no need for accounts and minimal data collecting from the user
 -	*Scalability* – the documentation and architecture should consider further developments of the project and make them easy to implement
 
-# Functional and non-functional requirements:
+# Functional and non-functional requirements
 
 ## Functional:
 
